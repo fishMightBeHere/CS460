@@ -1,3 +1,5 @@
+import java.util.stream.IntStream
+
 class Component1{
     companion object {
 
@@ -11,8 +13,19 @@ class Component1{
             return false;
         }
 
-        fun check_SEn(m: Matrix, epsilon: Double) {
+        fun check_SEn(m: Matrix, epsilon: Double):Boolean{
+            // seperate m into rotation and homogenous translation matrix, and verify both
 
+            val rotation = LinearAlgebra.minor(m,m.m-1, m.n-1)
+            if (!check_S0n(rotation, epsilon)) return false;
+            for (i in 0..m.n) {
+                if (m[m.m-1,i] != 0.0) return false
+            }
+            if (m[m.m-1,m.n-1] != 1.0) return false
+
+
+
+            return true
         }
     }
 }
