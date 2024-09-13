@@ -9,8 +9,7 @@ class Component1{
         }
 
         fun check_quaternion(v: Matrix, epsilon: Double): Boolean {
-            // idk what a quaternion is
-            return false;
+            return v.m == 4;
         }
 
         fun check_SEn(m: Matrix, epsilon: Double):Boolean{
@@ -18,14 +17,10 @@ class Component1{
 
             val rotation = LinearAlgebra.minor(m,m.m-1, m.n-1)
             if (!check_S0n(rotation, epsilon)) return false;
-            for (i in 0..m.n) {
+            for (i in 0..<m.n-1) {
                 if (m[m.m-1,i] != 0.0) return false
             }
-            if (m[m.m-1,m.n-1] != 1.0) return false
-
-
-
-            return true
+            return m[m.m-1,m.n-1] == 1.0
         }
     }
 }

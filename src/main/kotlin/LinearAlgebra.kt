@@ -145,13 +145,7 @@ class LinearAlgebra {
 
 fun main() {
     val matrix: Matrix = Matrix(2, 2)
-    val matrix2 = Matrix(2, 2)
-    matrix[0, 0] = 2.0
-    matrix[0,1] = 3.0
-    matrix[1, 1] = 1.0
+    println(matrix)
 
-    matrix2[0, 0] = 2.0
-    matrix2[1, 1] = 3.0
 
-    println(LinearAlgebra.multiply(matrix, matrix2))
 }
