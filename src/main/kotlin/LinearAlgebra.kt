@@ -51,6 +51,42 @@ data class Matrix(val m: Int, val n: Int) {
         IntStream.range(0, m).forEach { i -> c[i] = matrix[i][col] }
         return c
     }
+    //operator for matrix multiplication
+    operator fun times(b:Matrix) : Matrix {
+        return LinearAlgebra.multiply(this,b)
+    }
+    //operator for scalar matrix multiplication
+    operator fun times(b:Double) : Matrix {
+        val r = Matrix(this.m,this.n)
+        for (i in 0..<this.m) {
+            for (j in 0..<this.n) {
+                r[i,j] = this[i,j] * b
+            }
+        }
+        return r
+    }
+
+    operator fun minus(b: Matrix) : Matrix {
+        require(this.m == b.m && this.n == b.n) {"matrix dimensions do not match: [${this.m} x ${this.n}] - [${b.m} x ${b.n}"}
+        val r = this.copy()
+        for (i in 0..<r.m) {
+            for (j in 0..<r.n) {
+                r[i,j] -= b[i,j]
+            }
+        }
+        return r
+    }
+
+    operator fun plus(b: Matrix) :Matrix {
+        require(this.m == b.m && this.n == b.n) {"matrix dimensions do not match: [${this.m} x ${this.n}] - [${b.m} x ${b.n}"}
+        val r = this.copy()
+        for (i in 0..<r.m) {
+            for (j in 0..<r.n) {
+                r[i,j] += b[i,j]
+            }
+        }
+        return r
+    }
 }
 
 // functions should not be side effect based
@@ -139,6 +175,12 @@ class LinearAlgebra {
                 }
             }
             return t
+        }
+
+        fun identity(n:Int) : Matrix {
+            val m = Matrix(n,n)
+            IntStream.range(0,n).forEach { i-> m[i,i] = 1.0 }
+            return m
         }
     }
 }
