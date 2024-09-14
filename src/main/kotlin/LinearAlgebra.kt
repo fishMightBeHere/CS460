@@ -1,28 +1,6 @@
 import java.util.stream.IntStream
 import kotlin.math.pow
 
-data class Vector(val n: Int) {
-    val vector: DoubleArray = DoubleArray(n);
-
-    constructor(n: Int, e: DoubleArray) : this(n) {
-        IntStream.range(0, n).forEach { i -> vector[i] = e[i] }
-    }
-
-    operator fun plus(b: Vector): Vector {
-        val v: Vector = Vector(b.n)
-        IntStream.range(0, n).forEach { i -> v[i] = vector[i] + b[i] }
-        return v
-    }
-
-    operator fun get(i: Int): Double {
-        return vector[i];
-    }
-
-    operator fun set(i: Int, c: Double) {
-        vector[i] = c
-    }
-}
-
 data class Matrix(val m: Int, val n: Int) {
     val matrix: Array<DoubleArray> = Array(m) { DoubleArray(n) }
 
