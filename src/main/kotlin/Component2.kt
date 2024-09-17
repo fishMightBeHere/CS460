@@ -41,7 +41,7 @@ class Component2 {
                 r[1] = doubleArrayOf(-sin(theta), cos(theta), 0.0)
                 r[2] = doubleArrayOf(0.0, 0.0, 1.0)
 
-                rot = ((LinearAlgebra.multiply(v, LinearAlgebra.transpose(v)) * 2.0) - LinearAlgebra.identity(3)) * r
+                rot = ((v* LinearAlgebra.transpose(v)) * 2.0) - LinearAlgebra.identity(3) * r
             }
 
             return rot
