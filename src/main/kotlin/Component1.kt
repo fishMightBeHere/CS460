@@ -9,7 +9,8 @@ class Component1{
         }
 
         fun check_quaternion(v: Matrix, epsilon: Double): Boolean {
-            return v.m == 4;
+            if (v.m != 4) return false
+            return v[0,0]*v[0,0] + v[1,0]*v[1,0] + v[2,0]*v[2,0] + v[3,0]*v[3,0] == 1 + epsilon || v[0,0]*v[0,0] + v[1,0]*v[1,0] + v[2,0]*v[2,0] + v[3,0]*v[3,0] == 1 - epsilon
         }
 
         fun check_SEn(m: Matrix, epsilon: Double):Boolean{
