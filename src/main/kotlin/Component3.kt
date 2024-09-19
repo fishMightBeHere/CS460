@@ -21,13 +21,25 @@ class AwtExample : WindowAdapter() {
 }
 
 
+data class Pose(val x:Double,val y:Double, val theta:Double )
 
-data class Path(val p:Int) //path tmp
+data class Path(val path:MutableList<Pose> = mutableListOf()) //path tmp
 
 class Component3 {
     companion object {
         fun interpolate_rigid_body(start_pose:Matrix, goal_pose:Matrix) : Path {
-            return Path(1)
+            val dx = goal_pose[0,0] - start_pose[0,0]
+            val dy = goal_pose[1,0] - start_pose[1,0]
+            val dth = goal_pose[2,0] - start_pose[2,0]
+
+            val path = Path()
+
+            val steps = 10
+            for (i in 0..steps) {
+                path.path.add(Pose(start_pose[0,0]+(i*(dx/steps)), start_pose[1,0]+(i*(dy/steps)), start_pose[2,0]+(i*(dth/steps))))
+            }
+
+            return path
         }
 
     }
