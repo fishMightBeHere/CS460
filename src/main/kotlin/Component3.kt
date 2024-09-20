@@ -21,9 +21,15 @@ class AwtExample : WindowAdapter() {
 }
 
 
-data class Pose(val x:Double,val y:Double, val theta:Double )
+data class Pose(val x:Double,val y:Double, val theta:Double ) {
+    constructor(m:Matrix) : this(m[0,0],m[1,0],m[2,0])
+}
 
-data class Path(val path:MutableList<Pose> = mutableListOf()) //path tmp
+data class Path(val path:MutableList<Pose> = mutableListOf())
+
+typealias Velocity = Pose
+
+data class Plan(val plan: Collection<Pair<Velocity,Double>>)
 
 class Component3 {
     companion object {
@@ -42,6 +48,22 @@ class Component3 {
             return path
         }
 
+        fun forward_propogate_rigid_body(start_pose: Matrix, plan:Plan ) : Path {
+            val path = Path()
+            var curPose = Pose(start_pose)
+            path.path.add(curPose)
+            for(a:Pair<Velocity,Double> in plan.plan) {
+                curPose = Pose(a.first.x*a.second, a.first.y*a.second, a.first.theta*a.second)
+                path.path.add(curPose)
+            }
+            return path
+        }
+
+        fun visualise_path(path:Path) {
+            for (pose in path.path) {
+                //display list poses
+            }
+        }
     }
 }
 
