@@ -14,6 +14,9 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+    // https://mvnrepository.com/artifact/com.googlecode.princeton-java-introduction/introcs
+    implementation("com.googlecode.princeton-java-introduction:introcs:1.0.0")
+
 }
 
 tasks.test {

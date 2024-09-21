@@ -2,6 +2,12 @@ import java.util.stream.IntStream
 import kotlin.math.pow
 
 data class Matrix(val m: Int, val n: Int) {
+    constructor(v:DoubleArray) : this(m = v.size, n = 1)  {
+        for (i in 0..<m) {
+            matrix[i][0] = v[i]
+        }
+    }
+
     val matrix: Array<DoubleArray> = Array(m) { DoubleArray(n) }
 
     override fun toString(): String {
