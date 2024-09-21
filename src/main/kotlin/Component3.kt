@@ -1,25 +1,6 @@
-import java.awt.*
-import java.awt.event.WindowAdapter
-import java.awt.event.WindowEvent
-import kotlin.system.exitProcess
-
-class AwtExample : WindowAdapter() {
-    fun run() {
-        val frame = Frame("Example")
-        val label = Label("Hello")
-        label.alignment = Label.CENTER
-        frame.add(label)
-        frame.setSize(300,300)
-        frame.isVisible = true
-
-        frame.addWindowListener(object : WindowAdapter() {
-            override fun windowClosing(e: WindowEvent?) {
-                exitProcess(0)
-            }
-        })
-    }
-}
-
+import edu.princeton.cs.introcs.StdDraw
+import kotlin.math.cos
+import kotlin.math.sin
 
 data class Pose(val x:Double,val y:Double, val theta:Double ) {
     constructor(m:Matrix) : this(m[0,0],m[1,0],m[2,0])
@@ -30,6 +11,46 @@ data class Path(val path:MutableList<Pose> = mutableListOf())
 typealias Velocity = Pose
 
 data class Plan(val plan: Collection<Pair<Velocity,Double>>)
+
+//input coordinates of the 4 corners of the bot and the coordinates for the frame
+class Bot(val corner1:Pair<Double,Double>, val corner2:Pair<Double,Double>, val corner3:Pair<Double,Double>, val corner4:Pair<Double,Double>, val frameX:Double, val frameY:Double) {
+    private val cornerVector:MutableList<Matrix> = mutableListOf()
+    private val frameXY = Matrix(doubleArrayOf(frameX,frameY))
+    init {
+        // set vectors from frame towards the 4 corners
+        cornerVector.add(Matrix(doubleArrayOf(corner1.first-frameX,corner1.second-frameY)))
+        cornerVector.add(Matrix(doubleArrayOf(corner2.first-frameX,corner2.second-frameY)))
+        cornerVector.add(Matrix(doubleArrayOf(corner3.first-frameX,corner3.second-frameY)))
+        cornerVector.add(Matrix(doubleArrayOf(corner4.first-frameX,corner4.second-frameY)))
+    }
+    fun draw(pose: Pose) {
+        // convert pose into rotation and translation matrices and vectors
+        val rot = Matrix(2,2)
+        rot[0,0] = cos(pose.theta)
+        rot[0,1] = -sin(pose.theta)
+        rot[1,0] = sin(pose.theta)
+        rot[1,1] = cos(pose.theta)
+
+        // point translation = cv * rot +pose
+        val transformedMatrices = mutableListOf<Matrix>()
+        for (cv in cornerVector) {
+            transformedMatrices.add((cv*rot)+frameXY)
+        }
+
+        val xValues = mutableListOf<Double>()
+        val yValues = mutableListOf<Double>()
+        for (m in transformedMatrices) {
+            xValues.add(m[0,0])
+            yValues.add(m[1,0])
+        }
+
+
+
+        StdDraw.polygon(xValues.toDoubleArray(),yValues.toDoubleArray())
+
+    }
+
+}
 
 class Component3 {
     companion object {
@@ -68,6 +89,5 @@ class Component3 {
 }
 
 fun main() {
-    val v = AwtExample()
-    v.run()
+
 }
