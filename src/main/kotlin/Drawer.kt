@@ -1,6 +1,6 @@
 import edu.princeton.cs.introcs.StdDraw
 
-class Drawer(val x: Int, val y: Int,val drawScale:Int) {
+class Drawer(val x: Int, val y: Int,val drawScale:Double = 1.0) {
     init {
         StdDraw.setCanvasSize(x,y)
         StdDraw.setXscale(((-x*drawScale)/2).toDouble(), ((x*drawScale)/2).toDouble())

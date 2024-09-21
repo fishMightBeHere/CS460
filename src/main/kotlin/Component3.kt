@@ -49,6 +49,7 @@ class Bot(val corner1:Pair<Double,Double>, val corner2:Pair<Double,Double>, val 
 }
 
 class Component3 {
+
     companion object {
         fun interpolate_rigid_body(start_pose:Matrix, goal_pose:Matrix) : Path {
             val dx = goal_pose[0,0] - start_pose[0,0]
@@ -77,17 +78,22 @@ class Component3 {
         }
 
         fun visualise_path(path:Path) {
+            val bot = Bot(Pair(10.0,-20.0),Pair(10.0,20.0),Pair(-10.0,20.0),Pair(-10.0,-20.0),0.0,0.0)
             for (pose in path.path) {
                 //display list poses
+                bot.draw(pose)
             }
         }
     }
 }
 
 fun main() {
-    val canvas = Drawer(1000,1000,1)
+    val canvas = Drawer(1000,1000,1.0)
     canvas.axes()
-    val bot = Bot(Pair(10.0,-20.0),Pair(10.0,20.0),Pair(-10.0,20.0),Pair(-10.0,-20.0),0.0,0.0)
-    bot.draw(Pose(100.0,-100.0,Math.PI/4))
+    val p:MutableList<Pose> = mutableListOf()
+    for (i in 0..20) {
+        p.add(Pose(30.0*i,i*i*1.0, i*Math.PI/12))
+    }
+    Component3.visualise_path(Path(p))
     print("done")
 }
