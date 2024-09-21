@@ -34,7 +34,7 @@ class Bot(val corner1:Pair<Double,Double>, val corner2:Pair<Double,Double>, val 
         // point translation = cv * rot +pose
         val transformedMatrices = mutableListOf<Matrix>()
         for (cv in cornerVector) {
-            transformedMatrices.add((cv*rot)+frameXY)
+            transformedMatrices.add((rot*cv)+frameXY+Matrix(doubleArrayOf(pose.x,pose.y)))
         }
 
         val xValues = mutableListOf<Double>()
@@ -43,11 +43,7 @@ class Bot(val corner1:Pair<Double,Double>, val corner2:Pair<Double,Double>, val 
             xValues.add(m[0,0])
             yValues.add(m[1,0])
         }
-
-
-
         StdDraw.polygon(xValues.toDoubleArray(),yValues.toDoubleArray())
-
     }
 
 }
@@ -89,5 +85,9 @@ class Component3 {
 }
 
 fun main() {
-
+    val canvas = Drawer(1000,1000,1)
+    canvas.axes()
+    val bot = Bot(Pair(10.0,-20.0),Pair(10.0,20.0),Pair(-10.0,20.0),Pair(-10.0,-20.0),0.0,0.0)
+    bot.draw(Pose(100.0,-100.0,Math.PI/4))
+    print("done")
 }

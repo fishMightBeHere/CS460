@@ -10,6 +10,15 @@ data class Matrix(val m: Int, val n: Int) {
 
     val matrix: Array<DoubleArray> = Array(m) { DoubleArray(n) }
 
+    fun copy() : Matrix {
+        val copy = Matrix(this.m,this.n)
+        for (i in 0..<this.m) {
+            for (j in 0..<this.n) {
+                copy[i,j] = this[i,j]
+            }
+        }
+        return copy
+    }
     override fun toString(): String {
         return matrix.contentDeepToString()
     }
@@ -170,8 +179,13 @@ class LinearAlgebra {
 }
 
 fun main() {
-    val matrix: Matrix = Matrix(2, 2)
-    println(matrix)
+    val matrix: Matrix = Matrix(2, 1)
+    matrix[0,0] = 10.0
+    matrix[1,0] = 20.0
+    val m2 = Matrix(2,1)
+    m2[0,0] = 5.0
+    m2[1,0] = 0.0
+    println(matrix+m2)
 
 
 }
