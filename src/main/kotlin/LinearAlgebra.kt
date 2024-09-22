@@ -2,9 +2,11 @@ import java.util.stream.IntStream
 import kotlin.math.pow
 
 data class Matrix(val m: Int, val n: Int) {
-
     constructor(vararg e:Double) : this(m=e.size,n=1) {
         e.forEachIndexed { index, d -> matrix[index][0] = d }
+    }
+    constructor(vararg v:DoubleArray) : this(m=v.size,n=v[0].size){
+        v.forEachIndexed { i, d -> matrix[i] = d }
     }
 
     val matrix: Array<DoubleArray> = Array(m) { DoubleArray(n) }
