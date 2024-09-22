@@ -1,99 +1,168 @@
 import edu.princeton.cs.introcs.StdDraw
+import java.awt.Color
 import kotlin.math.cos
 import kotlin.math.sin
 
-data class Pose(val x:Double,val y:Double, val theta:Double ) {
-    constructor(m:Matrix) : this(m[0,0],m[1,0],m[2,0])
+data class Pose(val x: Double, val y: Double, val theta: Double) {
+    constructor(m: Matrix) : this(m[0, 0], m[1, 0], m[2, 0])
 }
 
-data class Path(val path:MutableList<Pose> = mutableListOf())
+data class Path(val path: MutableList<Pose> = mutableListOf())
 
 typealias Velocity = Pose
 
-data class Plan(val plan: Collection<Pair<Velocity,Double>>)
+data class Plan(val plan: Collection<Pair<Velocity, Double>>)
 
-//input coordinates of the 4 corners of the bot and the coordinates for the frame
-class Bot(val corner1:Pair<Double,Double>, val corner2:Pair<Double,Double>, val corner3:Pair<Double,Double>, val corner4:Pair<Double,Double>, val frameX:Double, val frameY:Double) {
-    private val cornerVector:MutableList<Matrix> = mutableListOf()
-    private val frameXY = Matrix(doubleArrayOf(frameX,frameY))
+// frame: Matrix [x,y] | theta relative to origin
+// endEffector : Matrix [x,y,theta] relative to origin, like a point but with a rotation, theta of end effector should be the same as frame to prevent confusion
+class Bot(
+    var frame: Pair<Matrix, Double>,
+    private val points: List<Pair<Double, Double>>,
+    private val endEffectors: List<Matrix>,
+    private val botColor: Color
+) {
+    private val cornerVector: MutableList<Matrix> = mutableListOf()
+    val vectorsToEndEffectors: MutableList<Pair<Matrix, Double>> = mutableListOf()
+    // [vx,vy], theta stores vector from frame pointing to each end effector, also stores that end effector's cur rotation
+
     init {
         // set vectors from frame towards the 4 corners
-        cornerVector.add(Matrix(doubleArrayOf(corner1.first-frameX,corner1.second-frameY)))
-        cornerVector.add(Matrix(doubleArrayOf(corner2.first-frameX,corner2.second-frameY)))
-        cornerVector.add(Matrix(doubleArrayOf(corner3.first-frameX,corner3.second-frameY)))
-        cornerVector.add(Matrix(doubleArrayOf(corner4.first-frameX,corner4.second-frameY)))
-    }
-    fun draw(pose: Pose) {
-        // convert pose into rotation and translation matrices and vectors
-        val rot = Matrix(2,2)
-        rot[0,0] = cos(pose.theta)
-        rot[0,1] = -sin(pose.theta)
-        rot[1,0] = sin(pose.theta)
-        rot[1,1] = cos(pose.theta)
+        for ((x, y) in points) {
+            cornerVector.add(Matrix(x - frame.first[0, 0], y - frame.first[1, 0]))
+        }
 
-        // point translation = cv * rot +pose
+        for (ef in endEffectors) {
+            vectorsToEndEffectors.add(Pair(Matrix(ef[0, 0] - frame.first[0, 0], ef[1, 0] - frame.first[1, 0]), ef[2, 0]))
+        }
+    }
+
+    fun draw() {
+        val (frameXY, theta) = frame
+
+        val rot = Matrix(2, 2)
+        rot[0, 0] = cos(theta)
+        rot[0, 1] = -sin(theta)
+        rot[1, 0] = sin(theta)
+        rot[1, 1] = cos(theta)
+
         val transformedMatrices = mutableListOf<Matrix>()
         for (cv in cornerVector) {
-            transformedMatrices.add((rot*cv)+frameXY+Matrix(doubleArrayOf(pose.x,pose.y)))
+            transformedMatrices.add((rot * cv) + frameXY)
         }
 
         val xValues = mutableListOf<Double>()
         val yValues = mutableListOf<Double>()
         for (m in transformedMatrices) {
-            xValues.add(m[0,0])
-            yValues.add(m[1,0])
+            xValues.add(m[0, 0])
+            yValues.add(m[1, 0])
         }
-        StdDraw.filledPolygon(xValues.toDoubleArray(),yValues.toDoubleArray())
+        StdDraw.setPenColor(botColor)
+        StdDraw.filledPolygon(xValues.toDoubleArray(), yValues.toDoubleArray())
+        StdDraw.setPenColor(Color.GREEN)
+        // draw frame
+        StdDraw.circle(frameXY[0, 0], frameXY[1, 0], 5.0)
+    }
+
+    //v:Matrix -> [x translation, y translation, theta rotation]
+    fun move(v: Pair<Matrix, Double>) {
+        var (frameXY, theta) = frame
+        frameXY += v.first
+        theta += v.second
+
+        frame = Pair(frameXY, theta)
+
+        val rot = Matrix(2, 2)
+        rot[0, 0] = cos(theta)
+        rot[0, 1] = -sin(theta)
+        rot[1, 0] = sin(theta)
+        rot[1, 1] = cos(theta)
+
+        //rotates vectors pointing to end effectors
+        for (index in vectorsToEndEffectors.indices) {
+            val (xy, thetaEF) = vectorsToEndEffectors[index]
+            // there may be a chance we need to rotate the end effector too, but I don't think so
+            vectorsToEndEffectors[index] = Pair(rot * xy + v.first, thetaEF)
+        }
+    }
+
+    fun getEndEffectors(): List<Pair<Matrix, Double>> {
+        val l = mutableListOf<Pair<Matrix, Double>>()
+        for ((ef, theta) in vectorsToEndEffectors) {
+            // add frame + vector to point, angle relative to origin axes is also summed
+            l.add(Pair(Matrix(ef[0, 0] + frame.first[0, 0]), theta + frame.second))
+        }
+        return l
     }
 }
 
+
 class Component3 {
+
     companion object {
-        fun interpolate_rigid_body(start_pose:Matrix, goal_pose:Matrix) : Path {
-            val dx = goal_pose[0,0] - start_pose[0,0]
-            val dy = goal_pose[1,0] - start_pose[1,0]
-            val dth = goal_pose[2,0] - start_pose[2,0]
+        val bot = Bot(
+            Pair(Matrix(0.0, 0.0), 0.0),
+            listOf(Pair(10.0, -20.0), Pair(10.0, 20.0), Pair(-10.0, 20.0), Pair(-10.0, -20.0)),
+            listOf(),
+            Color.PINK
+        )
+
+        fun interpolate_rigid_body(start_pose: Matrix, goal_pose: Matrix): Path {
+            val dx = goal_pose[0, 0] - start_pose[0, 0]
+            val dy = goal_pose[1, 0] - start_pose[1, 0]
+            val dth = goal_pose[2, 0] - start_pose[2, 0]
 
             val path = Path()
 
             val steps = 10
             for (i in 0..steps) {
-                path.path.add(Pose(start_pose[0,0]+(i*(dx/steps)), start_pose[1,0]+(i*(dy/steps)), start_pose[2,0]+(i*(dth/steps))))
+                path.path.add(
+                    Pose(
+                        start_pose[0, 0] + (i * (dx / steps)),
+                        start_pose[1, 0] + (i * (dy / steps)),
+                        start_pose[2, 0] + (i * (dth / steps))
+                    )
+                )
             }
 
             return path
         }
 
-        fun forward_propogate_rigid_body(start_pose: Matrix, plan:Plan ) : Path {
+        fun forward_propogate_rigid_body(start_pose: Matrix, plan: Plan): Path {
             val path = Path()
             var curPose = Pose(start_pose)
             path.path.add(curPose)
-            for(a:Pair<Velocity,Double> in plan.plan) {
-                curPose = Pose(a.first.x*a.second, a.first.y*a.second, a.first.theta*a.second)
+            for (a: Pair<Velocity, Double> in plan.plan) {
+                curPose = Pose(a.first.x * a.second, a.first.y * a.second, a.first.theta * a.second)
                 path.path.add(curPose)
             }
             return path
         }
 
-        fun visualise_path(path:Path) {
-            val bot = Bot(Pair(10.0,-20.0),Pair(10.0,20.0),Pair(-10.0,20.0),Pair(-10.0,-20.0),0.0,0.0)
+        fun visualise_path(path: Path) {
             for (pose in path.path) {
                 //display list poses
-                bot.draw(pose)
+                val dx = pose.x - bot.frame.first[0,0]
+                val dy = pose.y - bot.frame.first[1,0]
+                val dtheta = pose.theta - bot.frame.second
+                bot.move(Pair(Matrix(dx,dy),dtheta))
             }
         }
     }
 }
 
 fun main() {
-    val canvas = Drawer(1000,1000,2.0)
+    val canvas = Drawer(1000, 1000, 1.0)
     canvas.axes()
-//    val p:MutableList<Pose> = mutableListOf()
-//    for (i in 0..20) {
-//        p.add(Pose(30.0*i,i*i*1.0, i*Math.PI/12))
-//    }
-//    Component3.visualise_path(Path(p))
+    val bot = Bot(
+        Pair(Matrix(0.0, -10.0), 0.0),
+        listOf(Pair(10.0, 0.0), Pair(10.0, 20.0), Pair(-10.0, 20.0), Pair(-10.0, -0.0)),
+        listOf(),
+        Color.PINK
+    )
 
-    Component3.visualise_path(Component3.interpolate_rigid_body(Matrix(doubleArrayOf(0.0,0.0,0.0)),Matrix(doubleArrayOf(500.0,500.0,Math.PI/3))))
-    print("done")
+
+    bot.move(Pair(Matrix(100.0,100.0),Math.PI/4))
+    bot.draw()
+    bot.move(Pair(Matrix(-100.0,0.0),0.0))
+    bot.draw()
 }
