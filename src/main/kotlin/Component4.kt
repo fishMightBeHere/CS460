@@ -1,3 +1,4 @@
+import edu.princeton.cs.introcs.StdDraw
 import java.awt.Color
 import kotlin.math.PI
 
@@ -5,7 +6,7 @@ typealias Vector = Matrix
 
 data class ArmPath(val path: MutableList<Pair<Pose, Pose>>)
 
-typealias AnglePose = Pair<Double,Double>
+typealias AnglePose = Pair<Double, Double>
 
 class Component4 {
     val l1 = Bot(
@@ -27,8 +28,8 @@ class Component4 {
     fun interpolate_arm(start: Vector, goal: Vector): ArmPath {
         val step = 0.1
         val p = ArmPath(mutableListOf())
-        val dtheta1 = goal[0, 0] - start[0,0]
-        val dtheta2 = goal[1, 0] - start[1,0]
+        val dtheta1 = goal[0, 0] - start[0, 0]
+        val dtheta2 = goal[1, 0] - start[1, 0]
 
         var dt = 0.0
         while (dt <= 1) {
@@ -42,11 +43,12 @@ class Component4 {
         }
         return p
     }
+
     //plan stores angular velocities of joints w1, w2, returns a path with pose represented as a pair of angles
     fun forward_propagate_arm(start_pose: Vector, plan: Plan<AnglePose>): Path<AnglePose> {
-        val p:MutableList<AnglePose> = mutableListOf()
-        for ((v,t) in plan.plan) {
-            p.add(Pair(start_pose[0,0] + v.first*t, start_pose[1,0] + v.second*t))
+        val p: MutableList<AnglePose> = mutableListOf()
+        for ((v, t) in plan.plan) {
+            p.add(Pair(start_pose[0, 0] + v.first * t, start_pose[1, 0] + v.second * t))
         }
         return Path(p)
     }
@@ -54,18 +56,19 @@ class Component4 {
     fun visualize_arm_path(path: Path<AnglePose>) {
         for ((theta1, theta2) in path.path) {
             val dtheta1 = theta1 - l1.frame.second
-            val dtheta2 = theta2 - l2.frame.second
+            val dtheta2 = theta2 + l1.frame.second - l2.frame.second
 
-            val step = 0.1
-            for (i in 0..<10) {
+            val step = 0.01
+            for (i in 0..<100) {
+                StdDraw.clear()
                 l1.rotate(step * dtheta1)
                 l2.update()
                 l2.rotate(step * dtheta2)
                 l1.draw()
                 l2.draw()
-                Thread.sleep(50)
-                //StdDraw.clear()
+                Thread.sleep(1)
             }
+
 
         }
     }
@@ -78,22 +81,18 @@ fun main() {
 
     val c4 = Component4()
 
-    /*c4.l1.rotate(PI/4)
-    c4.l2.update()
-    c4.l1.draw()
-    c4.l2.draw()
-
-    c4.l2.rotate(-PI/4)
-    c4.l1.draw()
-    c4.l2.draw()
-
-    c4.l1.rotate(-PI/4)
-    c4.l2.update()
-    c4.l1.draw()
-    c4.l2.draw()*/
-
-
-    c4.visualize_arm_path(Path(mutableListOf(Pair(0.0,PI/4),Pair(-PI/4,PI/4),Pair(-PI/4,-PI/4))))
-
+    c4.visualize_arm_path(
+        Path(
+            mutableListOf(
+                Pair(PI/4,0.0),
+                Pair(-PI / 4,-PI/4),
+                Pair(0.0,0.0),
+                Pair(PI,0.0),
+                Pair(0.0,PI),
+                Pair(0.0,0.0)
+            )
+        )
+    )
+    print("done")
 
 }

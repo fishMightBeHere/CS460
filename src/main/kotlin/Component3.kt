@@ -1,3 +1,4 @@
+import edu.princeton.cs.introcs.StdDraw
 import java.awt.Color
 import kotlin.math.PI
 
@@ -62,6 +63,7 @@ class Component3 {
 
                 val step = 0.01
                 for (count in 0..<100) {
+                    StdDraw.clear()
                     bot.move(Pair(Matrix(dx, dy) * step,step*dtheta))
                     bot.draw()
                     Thread.sleep(10)
@@ -75,16 +77,6 @@ class Component3 {
 fun main() {
     val canvas = Drawer(1000, 1000, 1.0)
     canvas.axes()
-    Component3.visualise_path(Path(mutableListOf(Pose(100.0,100.0,PI))))
+    Component3.visualise_path(Path(mutableListOf(Pose(100.0,100.0,PI/4),Pose(0.0,100.0,0.0),Pose(-100.0,0.0,-PI/4),Pose(-100.0,0.0,2*PI))))
 
-
-
-//     ground translations don't seem to quite work, it seems that somewhere a rotation value is lost
-    /*ground.move(Pair(Matrix(50.0,50.0),0.0))
-    arm1.update()
-    arm2.update()
-    arm1.draw()
-    arm2.draw()*/
-
-    // we need to implement a hierarchy of arms starting from ground towards last arm to allow for automatic arm updates
 }
