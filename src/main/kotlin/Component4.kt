@@ -1,4 +1,3 @@
-import edu.princeton.cs.introcs.StdDraw
 import java.awt.Color
 import kotlin.math.PI
 
@@ -28,8 +27,8 @@ class Component4 {
     fun interpolate_arm(start: Vector, goal: Vector): ArmPath {
         val step = 0.1
         val p = ArmPath(mutableListOf())
-        val dtheta1 = goal[0, 0]
-        val dtheta2 = goal[1, 0]
+        val dtheta1 = goal[0, 0] - start[0,0]
+        val dtheta2 = goal[1, 0] - start[1,0]
 
         var dt = 0.0
         while (dt <= 1) {
