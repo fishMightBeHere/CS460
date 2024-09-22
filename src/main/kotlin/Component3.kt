@@ -123,6 +123,10 @@ class Bot(
         move(Pair(Matrix(0.0,0.0),0.0))
     }
 
+    fun rotate(theta:Double) {
+        move(Pair(Matrix(0.0,0.0),theta))
+    }
+
     fun getEndEffector(): Pair<Matrix, Double>? {
         return transformedEF
     }
@@ -192,24 +196,39 @@ fun main() {
         Matrix(0.0,0.0,0.0),
         Color.black
     )
-    val bot = Bot(
+    val arm1 = Bot(
         Pair(Matrix(0.0, 0.0), 0.0),
-        listOf(Pair(10.0, 0.0), Pair(10.0, 20.0), Pair(-10.0, 20.0), Pair(-10.0, 0.0)),
-        null,
+        listOf(Pair(10.0, 0.0), Pair(10.0, 40.0), Pair(-10.0, 40.0), Pair(-10.0, 0.0)),
+        Matrix(0.0,40.0,0.0),
         botColor = Color.PINK,
         root = ground
     )
+    val arm2 = Bot(
+        Pair(Matrix(0.0,0.0),0.0),
+        listOf(Pair(10.0,0.0),Pair(10.0,20.0),Pair(-10.0,20.0),Pair(-10.0,0.0)),
+        null,
+        Color.ORANGE,
+        arm1
+    )
 
-    ground.move(Pair(Matrix(0.0,0.0),PI/4))
-    bot.update()
-//  bot.draw()
-    bot.move(Pair(Matrix(0.0,0.0),-PI/4))
-    bot.draw()
-    ground.move(Pair(Matrix(0.0,0.0),-PI))
-    bot.update()
-    bot.draw()
-    ground.move(Pair(Matrix(0.0,0.0),-PI/2))
-    bot.update()
-    bot.draw()
+    arm1.draw()
+    arm2.draw()
+
+    ground.rotate(PI/4)
+    arm1.update()
+    arm2.update()
+    arm1.draw()
+    arm2.draw()
+
+    arm1.rotate(PI/4)
+    arm2.update()
+    arm1.draw()
+    arm2.draw()
+
+    arm2.rotate(PI/4)
+    arm1.draw()
+    arm2.draw()
+
+    // we need to implement a hierarchy of arms starting from ground towards last arm to allow for automatic arm updates
 
 }
