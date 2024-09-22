@@ -43,13 +43,11 @@ class Bot(val corner1:Pair<Double,Double>, val corner2:Pair<Double,Double>, val 
             xValues.add(m[0,0])
             yValues.add(m[1,0])
         }
-        StdDraw.polygon(xValues.toDoubleArray(),yValues.toDoubleArray())
+        StdDraw.filledPolygon(xValues.toDoubleArray(),yValues.toDoubleArray())
     }
-
 }
 
 class Component3 {
-
     companion object {
         fun interpolate_rigid_body(start_pose:Matrix, goal_pose:Matrix) : Path {
             val dx = goal_pose[0,0] - start_pose[0,0]
@@ -88,12 +86,14 @@ class Component3 {
 }
 
 fun main() {
-    val canvas = Drawer(1000,1000,1.0)
+    val canvas = Drawer(1000,1000,2.0)
     canvas.axes()
-    val p:MutableList<Pose> = mutableListOf()
-    for (i in 0..20) {
-        p.add(Pose(30.0*i,i*i*1.0, i*Math.PI/12))
-    }
-    Component3.visualise_path(Path(p))
+//    val p:MutableList<Pose> = mutableListOf()
+//    for (i in 0..20) {
+//        p.add(Pose(30.0*i,i*i*1.0, i*Math.PI/12))
+//    }
+//    Component3.visualise_path(Path(p))
+
+    Component3.visualise_path(Component3.interpolate_rigid_body(Matrix(doubleArrayOf(0.0,0.0,0.0)),Matrix(doubleArrayOf(500.0,500.0,Math.PI/3))))
     print("done")
 }
