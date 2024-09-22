@@ -24,7 +24,7 @@ class Bot(
     val root:Bot? = null,
 ) {
     private val cornerVector: MutableList<Matrix> = mutableListOf()
-    var vectorToEndEffectors: Pair<Matrix, Double>? = null
+    var vectorToEndEffector: Pair<Matrix, Double>? = null
     var transformedEF: Pair<Matrix,Double>? = null
 
     init {
@@ -33,7 +33,7 @@ class Bot(
             cornerVector.add(Matrix(x - frame.first[0, 0], y - frame.first[1, 0]))
         }
         if (endEffector != null) {
-            vectorToEndEffectors = Pair(Matrix(endEffector[0, 0] - frame.first[0, 0], endEffector[1, 0] - frame.first[1, 0]), endEffector[2, 0])
+            vectorToEndEffector = Pair(Matrix(endEffector[0, 0] - frame.first[0, 0], endEffector[1, 0] - frame.first[1, 0]), endEffector[2, 0])
             transformedEF = Pair(Matrix(endEffector[0, 0] - frame.first[0, 0], endEffector[1, 0] - frame.first[1, 0]), endEffector[2, 0])
         }
         if (root != null) frame = root.getEndEffector()!!
@@ -94,10 +94,12 @@ class Bot(
     fun move(v: Pair<Matrix, Double>) {
         var (frameXY, theta) = frame
         if (root != null) {
-            frameXY = root.getEndEffector()!!.first
-            theta = root.getEndEffector()!!.second + v.second
+            root.vectorToEndEffector = Pair(root.vectorToEndEffector!!.first, root.vectorToEndEffector!!.second+v.second)
 
-            root.transformedEF = Pair(root.transformedEF!!.first,theta)
+            frameXY = root.transformedEF!!.first
+            theta = root.vectorToEndEffector!!.second
+
+
             //root.vectorToEndEffectors = Pair(root.vectorToEndEffectors!!.first,root.vectorToEndEffectors!!.second + theta)
 
         } else {
@@ -105,16 +107,18 @@ class Bot(
             theta += v.second
         }
         frame = Pair(frameXY, theta)
+
         val rot = Matrix(2, 2)
         rot[0, 0] = cos(v.second)
         rot[0, 1] = -sin(v.second)
         rot[1, 0] = sin(v.second)
         rot[1, 1] = cos(v.second)
 
-        if (vectorToEndEffectors != null) {//rotates vectors pointing to end effectors
-            val (efXY, thetaEF) = vectorToEndEffectors!!
+        if (vectorToEndEffector != null) {//rotates vectors pointing to end effectors
+            val (efXY, thetaEF) = vectorToEndEffector!!
             val frameRot = Matrix(doubleArrayOf(cos(theta),-sin(theta)), doubleArrayOf(sin(theta), cos(theta)))
-            transformedEF= Pair(frameRot*efXY+frameXY,thetaEF+theta)
+            vectorToEndEffector = Pair(efXY,thetaEF+v.second)
+            transformedEF= Pair(frameRot*efXY+frameXY,thetaEF+v.second)
         }
 
     }
@@ -211,23 +215,36 @@ fun main() {
         arm1
     )
 
+    arm2.update()
     arm1.draw()
     arm2.draw()
 
-    ground.rotate(PI/4)
+    arm1.rotate(PI/2)
+    arm2.update()
+    arm1.draw()
+    arm2.draw()
+
+    arm2.rotate(PI/2)
+    arm1.draw()
+    arm2.draw()
+
+    arm1.rotate(PI/2)
+    arm2.update()
+    arm1.draw()
+    arm2.draw()
+
+    arm1.rotate(PI/2)
+    arm2.update()
+    arm1.draw()
+    arm2.draw()
+
+
+//     ground translations don't seem to quite work, it seems that somewhere a rotation value is lost
+    /*ground.move(Pair(Matrix(50.0,50.0),0.0))
     arm1.update()
     arm2.update()
     arm1.draw()
-    arm2.draw()
-
-    arm1.rotate(PI/4)
-    arm2.update()
-    arm1.draw()
-    arm2.draw()
-
-    arm2.rotate(PI/4)
-    arm1.draw()
-    arm2.draw()
+    arm2.draw()*/
 
     // we need to implement a hierarchy of arms starting from ground towards last arm to allow for automatic arm updates
 
