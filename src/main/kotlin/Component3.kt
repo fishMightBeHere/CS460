@@ -138,7 +138,6 @@ class Bot(
 
 
 class Component3 {
-
     companion object {
         val bot = Bot(
             Pair(Matrix(0.0, 0.0), 0.0),
@@ -185,58 +184,24 @@ class Component3 {
                 val dx = pose.x - bot.frame.first[0,0]
                 val dy = pose.y - bot.frame.first[1,0]
                 val dtheta = pose.theta - bot.frame.second
-                bot.move(Pair(Matrix(dx,dy),dtheta))
+
+                val step = 0.1
+                for (count in 0..<10) {
+                    bot.move(Pair(Matrix(dx, dy) * step,step*dtheta))
+                    bot.draw()
+                    Thread.sleep(10)
+                }
+
             }
         }
     }
 }
 
 fun main() {
-    val canvas = Drawer(1000, 1000, 0.5)
+    val canvas = Drawer(1000, 1000, 1.0)
     canvas.axes()
-    val ground = Bot(
-        Pair(Matrix(0.0,0.0),0.0),
-        listOf(),
-        Matrix(0.0,0.0,0.0),
-        Color.black
-    )
-    val arm1 = Bot(
-        Pair(Matrix(0.0, 0.0), 0.0),
-        listOf(Pair(10.0, 0.0), Pair(10.0, 40.0), Pair(-10.0, 40.0), Pair(-10.0, 0.0)),
-        Matrix(0.0,40.0,0.0),
-        botColor = Color.PINK,
-        root = ground
-    )
-    val arm2 = Bot(
-        Pair(Matrix(0.0,0.0),0.0),
-        listOf(Pair(10.0,0.0),Pair(10.0,20.0),Pair(-10.0,20.0),Pair(-10.0,0.0)),
-        null,
-        Color.ORANGE,
-        arm1
-    )
+    Component3.visualise_path(Path(mutableListOf(Pose(100.0,100.0,PI))))
 
-    arm2.update()
-    arm1.draw()
-    arm2.draw()
-
-    arm1.rotate(PI/2)
-    arm2.update()
-    arm1.draw()
-    arm2.draw()
-
-    arm2.rotate(PI/2)
-    arm1.draw()
-    arm2.draw()
-
-    arm1.rotate(PI/2)
-    arm2.update()
-    arm1.draw()
-    arm2.draw()
-
-    arm1.rotate(PI/2)
-    arm2.update()
-    arm1.draw()
-    arm2.draw()
 
 
 //     ground translations don't seem to quite work, it seems that somewhere a rotation value is lost
@@ -247,5 +212,4 @@ fun main() {
     arm2.draw()*/
 
     // we need to implement a hierarchy of arms starting from ground towards last arm to allow for automatic arm updates
-
 }
