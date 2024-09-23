@@ -1,4 +1,7 @@
-import java.util.stream.IntStream
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.random.Random
 
 class Component1{
     companion object {
@@ -10,7 +13,7 @@ class Component1{
 
         fun check_quaternion(v: Matrix, epsilon: Double): Boolean {
             if (v.m != 4) return false
-            return v[0,0]*v[0,0] + v[1,0]*v[1,0] + v[2,0]*v[2,0] + v[3,0]*v[3,0] == 1 + epsilon || v[0,0]*v[0,0] + v[1,0]*v[1,0] + v[2,0]*v[2,0] + v[3,0]*v[3,0] == 1 - epsilon
+            return v[0,0]*v[0,0] + v[1,0]*v[1,0] + v[2,0]*v[2,0] + v[3,0]*v[3,0] <= 1 + epsilon || v[0,0]*v[0,0] + v[1,0]*v[1,0] + v[2,0]*v[2,0] + v[3,0]*v[3,0] >= 1 - epsilon
         }
 
         fun check_SEn(m: Matrix, epsilon: Double):Boolean{
@@ -24,4 +27,17 @@ class Component1{
             return m[m.m-1,m.n-1] == 1.0
         }
     }
+}
+
+fun main() {
+    println(Component1.check_S0n(Component2.random_rotation_matrix(false).also { i-> println(i) }, 0.01))
+    println(Component1.check_quaternion(Component2.random_quaternion(false).also { i-> println(i) },0.01))
+
+    val theta = 2* PI* Random.nextDouble()
+    val m = Matrix(doubleArrayOf(cos(theta),-sin(theta),20.0), doubleArrayOf(sin(theta),cos(theta),15.0), doubleArrayOf(0.0,0.0,1.0))
+    println(m)
+    println(Component1.check_SEn(m,0.01))
+
+
+
 }

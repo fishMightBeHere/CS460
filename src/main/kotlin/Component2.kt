@@ -49,7 +49,7 @@ class Component2 {
 
 
         fun random_quaternion(naive: Boolean): Matrix {
-            val rot = Matrix(4, 0)
+            val rot = Matrix(4, 1)
             if (naive) {
                 //euler angles
                 val theta = 2*Math.PI * Random.nextDouble()
@@ -74,4 +74,11 @@ class Component2 {
             return rot
         }
     }
+}
+
+fun main() {
+    println(Component2.random_rotation_matrix(true))
+    println(Component2.random_rotation_matrix(false))
+    println(Component2.random_quaternion(true))
+    println(Component2.random_quaternion(false))
 }
