@@ -7,8 +7,8 @@ import kotlin.math.sin
 // endEffector : Matrix [x,y,theta] relative to origin, like a point but with a rotation, theta of end effector should be the same as frame to prevent confusion
 class Bot(
     var frame: Pair<Matrix, Double>,
-    private val points: List<Pair<Double, Double>>,
-    private val endEffector: Matrix?,
+    points: List<Pair<Double, Double>>,
+    endEffector: Matrix? = null,
     private val botColor: Color,
     val root: Bot? = null,
 ) {
@@ -52,7 +52,7 @@ class Bot(
             xValues.add(m[0, 0])
             yValues.add(m[1, 0])
         }
-        if (!xValues.isEmpty()) {
+        if (xValues.isNotEmpty()) {
             StdDraw.setPenColor(botColor)
             StdDraw.filledPolygon(xValues.toDoubleArray(), yValues.toDoubleArray())
             StdDraw.setPenColor(Color.GREEN)
@@ -111,10 +111,6 @@ class Bot(
 
             frameXY = root.transformedEF!!.first
             theta = root.vectorToEndEffector!!.second
-
-
-            //root.vectorToEndEffectors = Pair(root.vectorToEndEffectors!!.first,root.vectorToEndEffectors!!.second + theta)
-
         } else {
             frameXY += v.first
             theta += v.second

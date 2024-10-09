@@ -1,7 +1,10 @@
 import java.util.stream.IntStream
+import kotlin.math.cos
 import kotlin.math.pow
+import kotlin.math.sin
 
 data class Matrix(val m: Int, val n: Int) {
+    //generates a vector
     constructor(vararg e:Double) : this(m=e.size,n=1) {
         e.forEachIndexed { index, d -> matrix[index][0] = d }
     }
@@ -175,6 +178,15 @@ class LinearAlgebra {
             val m = Matrix(n,n)
             IntStream.range(0,n).forEach { i-> m[i,i] = 1.0 }
             return m
+        }
+
+        fun rotationMatrixR2(theta: Double) : Matrix{
+            val m = Matrix(2,2);
+            m[0][0] = cos(theta)
+            m[0][1] = -sin(theta)
+            m[1][0] = sin(theta)
+            m[1][1] = cos(theta)
+            return m;
         }
     }
 }

@@ -8,7 +8,7 @@ data class ArmPath(val path: MutableList<Pair<Pose, Pose>>)
 
 typealias AnglePose = Pair<Double, Double>
 
-class Component4 {
+class A1C4 {
     val l1 = Bot(
         frame = Pair(Matrix(0.0, 0.0), 0.0),
         points = listOf(Pair(5.0, -10.0), Pair(5.0, 10.0), Pair(-5.0, 10.0), Pair(-5.0, -10.0)),
@@ -79,7 +79,7 @@ fun main() {
     val canvas = Drawer(1000, 1000, 0.25)
     canvas.axes()
 
-    val c4 = Component4()
+    val c4 = A1C4()
 
     c4.visualize_arm_path(
         Path(

@@ -13,7 +13,7 @@ typealias Velocity = Pose
 data class Plan<T>(val plan: Collection<Pair<T, Double>>)
 
 
-class Component3 {
+class A1C3 {
     companion object {
         val bot = Bot(
             Pair(Matrix(0.0, 0.0), 0.0),
@@ -77,6 +77,6 @@ class Component3 {
 fun main() {
     val canvas = Drawer(1000, 1000, 1.0)
     canvas.axes()
-    Component3.visualise_path(Path(mutableListOf(Pose(100.0,100.0,PI/4),Pose(0.0,100.0,0.0),Pose(-100.0,0.0,-PI/4),Pose(-100.0,0.0,2*PI))))
+    A1C3.visualise_path(Path(mutableListOf(Pose(100.0,100.0,PI/4),Pose(0.0,100.0,0.0),Pose(-100.0,0.0,-PI/4),Pose(-100.0,0.0,2*PI))))
 
 }

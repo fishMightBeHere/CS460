@@ -2,9 +2,8 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlin.random.Random
-import kotlin.random.asJavaRandom
 
-class Component2 {
+class A1C2 {
     companion object {
         fun random_rotation_matrix(naive: Boolean): Matrix {
             var rot = Matrix(3, 3)
@@ -27,9 +26,9 @@ class Component2 {
 
 
             } else {
-                val theta = 2 * Math.PI * Random.nextDouble()
-                val phi = 2 * Math.PI * Random.nextDouble()
-                val z = Random.nextDouble()
+                    val theta = 2 * Math.PI * Random.nextDouble()
+                    val phi = 2 * Math.PI * Random.nextDouble()
+                    val z = Random.nextDouble()
 
                 val v = Matrix(3, 1)
                 v[0, 0] = cos(phi) * sqrt(z)
@@ -77,8 +76,8 @@ class Component2 {
 }
 
 fun main() {
-    println(Component2.random_rotation_matrix(true))
-    println(Component2.random_rotation_matrix(false))
-    println(Component2.random_quaternion(true))
-    println(Component2.random_quaternion(false))
+    println(A1C2.random_rotation_matrix(true))
+    println(A1C2.random_rotation_matrix(false))
+    println(A1C2.random_quaternion(true))
+    println(A1C2.random_quaternion(false))
 }
