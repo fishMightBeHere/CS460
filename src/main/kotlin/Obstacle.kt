@@ -13,11 +13,10 @@ class SquareObstacle(
         // generate cornerCoordinates
         val (f, t) = frame;
         val m = LinearAlgebra.rotationMatrixR2(t)
-        cornerCoordinates.add(m * (f + Matrix(-length / 2, width / 2)))
-        cornerCoordinates.add(m * (f + Matrix(length / 2, width / 2)))
-
-        cornerCoordinates.add(m * (f + Matrix(length / 2, -width / 2)))
-        cornerCoordinates.add(m * (f + Matrix(-length / 2, -width / 2)))
+        cornerCoordinates.add(m * (f + Matrix(-length / 2, width / 2)))//top left
+        cornerCoordinates.add(m * (f + Matrix(length / 2, width / 2)))//top right
+        cornerCoordinates.add(m * (f + Matrix(length / 2, -width / 2)))//bottom right
+        cornerCoordinates.add(m * (f + Matrix(-length / 2, -width / 2)))//bottom left
     }
 
     fun draw() {
@@ -35,7 +34,18 @@ class SquareObstacle(
         }
     }
 
-    fun collision(obj: Bot) {
+    fun isCollision(obj: Bot) : Boolean{
+        // construct parametric lines to represent edges of obstacle and bot, take each corner of opposite object and check if it satisfies all inequalities
+        // x(t) = x0 + tdx
+        // y(t) = y0 + tdy
+        val l:MutableList<(Int)->Boolean>
+        //given endpoints a and b, and input point c, check if c satisfies the inequality formed by line a and b given if compare compares greater than or less than
+        fun inequality(a:Matrix, b:Matrix, c:Matrix, compare:(Matrix)->Boolean) :Boolean {
 
+            return false;
+        }
+
+
+        return false;
     }
 }
