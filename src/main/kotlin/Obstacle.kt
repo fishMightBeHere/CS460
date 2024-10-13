@@ -1,5 +1,6 @@
 import edu.princeton.cs.introcs.StdDraw
 import java.awt.Color
+import kotlin.time.times
 
 class SquareObstacle(
     val frame: Pair<Matrix, Double>,
@@ -38,14 +39,19 @@ class SquareObstacle(
         // construct parametric lines to represent edges of obstacle and bot, take each corner of opposite object and check if it satisfies all inequalities
         // x(t) = x0 + tdx
         // y(t) = y0 + tdy
-        val l:MutableList<(Int)->Boolean>
-        //given endpoints a and b, and input point c, check if c satisfies the inequality formed by line a and b given if compare compares greater than or less than
-        fun inequality(a:Matrix, b:Matrix, c:Matrix, compare:(Matrix)->Boolean) :Boolean {
+        val l:MutableList<(Matrix)->Boolean> = mutableListOf()
 
-            return false;
+        for (i in 0..<cornerCoordinates.size) {
+            l.add { m: Matrix ->
+                val dxdy = cornerCoordinates[(i+1)%cornerCoordinates.size] - cornerCoordinates[i]
+                val t = if (dxdy[0,0] == 0.0) 0.0 else (m[0,0] - cornerCoordinates[i][0,0])/dxdy[0,0]
+                // check if input point and frame are on same side of line
+                return@add !(m[1,0] <= (cornerCoordinates[i][1,0] + dxdy[1,0]*t)) xor (frame.first[1,0] <= cornerCoordinates[i][1,0] + dxdy[1,0]*t)
+            }
         }
-
-
+        // caluclate xy coordinates of bot
+        val corners = obj.cornerVector.map { LinearAlgebra.rotationMatrixR2(obj.frame.second)*it + obj.frame.first}.toList()
+        l.zip(corners).map { (f,p) ->  f(p) }.filter { it }.ifEmpty { return true } //note this only compares obj's corners to the obstacle, we also need to check center and compare corners with each other
         return false;
     }
 }

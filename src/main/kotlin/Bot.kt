@@ -12,7 +12,7 @@ class Bot(
     private val botColor: Color,
     val root: Bot? = null,
 ) {
-    private val cornerVector: MutableList<Matrix> = mutableListOf()
+    val cornerVector: MutableList<Matrix> = mutableListOf()
     var vectorToEndEffector: Pair<Matrix, Double>? = null
     var transformedEF: Pair<Matrix,Double>? = null
 
