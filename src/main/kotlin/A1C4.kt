@@ -76,7 +76,7 @@ class A1C4 {
 }
 
 fun main() {
-    val canvas = Drawer(1000, 1000, 0.25)
+    val canvas = Drawer(1000, 1000, drawScale = 0.25)
     canvas.axes()
 
     val c4 = A1C4()

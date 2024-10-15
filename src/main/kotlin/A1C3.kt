@@ -75,7 +75,7 @@ class A1C3 {
 }
 
 fun main() {
-    val canvas = Drawer(1000, 1000, 1.0)
+    val canvas = Drawer(1000, 1000, drawScale = 1.0)
     canvas.axes()
     A1C3.visualise_path(Path(mutableListOf(Pose(100.0,100.0,PI/4),Pose(0.0,100.0,0.0),Pose(-100.0,0.0,-PI/4),Pose(-100.0,0.0,2*PI))))
 

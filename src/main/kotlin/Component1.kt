@@ -56,7 +56,7 @@ class Component1 {
 }
 
 fun main() {
-    val b = Drawer(750, 750, 0.3)
+    val b = Drawer(750, 750, drawScale = 0.3)
     val a = Component1.generate_enviroment(5);
     Component1.visualize_scene(a);
 }
