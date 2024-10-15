@@ -75,7 +75,7 @@ data class Matrix(val m: Int, val n: Int) {
     }
 
     operator fun plus(b: Matrix) :Matrix {
-        require(this.m == b.m && this.n == b.n) {"matrix dimensions do not match: [${this.m} x ${this.n}] - [${b.m} x ${b.n}"}
+        require(this.m == b.m && this.n == b.n) {"matrix dimensions do not match: [${this.m} x ${this.n}] - [${b.m} x ${b.n}]"}
         val r = this.copy()
         for (i in 0..<r.m) {
             for (j in 0..<r.n) {

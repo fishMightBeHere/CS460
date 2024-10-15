@@ -132,6 +132,10 @@ class Bot(
 
     }
 
+    fun teleport(f: Pair<Matrix, Double>) {
+        frame = f
+    }
+
     fun update() {
         move(Pair(Matrix(0.0, 0.0),0.0))
     }

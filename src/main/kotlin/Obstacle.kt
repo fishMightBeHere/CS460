@@ -1,12 +1,9 @@
 import edu.princeton.cs.introcs.StdDraw
 import java.awt.Color
-import kotlin.time.times
+import kotlin.math.PI
 
 class SquareObstacle(
-    val frame: Pair<Matrix, Double>,
-    val length: Double,
-    val width: Double,
-    private val color: Color = Color.BLACK
+    val frame: Pair<Matrix, Double>, val length: Double, val width: Double, val color: Color = Color.BLACK
 ) {
     val cornerCoordinates: MutableList<Matrix> = mutableListOf()
 
@@ -25,8 +22,8 @@ class SquareObstacle(
         val xVal = mutableListOf<Double>()
         val yVal = mutableListOf<Double>()
         for (p in cornerCoordinates) {
-            xVal.add(p[0,0])
-            yVal.add(p[1,0])
+            xVal.add(p[0, 0])
+            yVal.add(p[1, 0])
         }
 
         if (xVal.isNotEmpty()) {
@@ -35,23 +32,63 @@ class SquareObstacle(
         }
     }
 
-    fun isCollision(obj: Bot) : Boolean{
-        // construct parametric lines to represent edges of obstacle and bot, take each corner of opposite object and check if it satisfies all inequalities
-        // x(t) = x0 + tdx
-        // y(t) = y0 + tdy
-        val l:MutableList<(Matrix)->Boolean> = mutableListOf()
+    //returns true if there is a collision, false if there is no collision
+    fun isCollision(obj: Bot): Boolean {
+        val obsf: MutableList<(Matrix) -> Boolean> = mutableListOf()
 
         for (i in 0..<cornerCoordinates.size) {
-            l.add { m: Matrix ->
-                val dxdy = cornerCoordinates[(i+1)%cornerCoordinates.size] - cornerCoordinates[i]
-                val t = if (dxdy[0,0] == 0.0) 0.0 else (m[0,0] - cornerCoordinates[i][0,0])/dxdy[0,0]
-                // check if input point and frame are on same side of line
-                return@add !(m[1,0] <= (cornerCoordinates[i][1,0] + dxdy[1,0]*t)) xor (frame.first[1,0] <= cornerCoordinates[i][1,0] + dxdy[1,0]*t)
+            obsf.add { m: Matrix ->
+                val dxdy = cornerCoordinates[(i + 1) % cornerCoordinates.size] - cornerCoordinates[i]
+                if (dxdy[0, 0] == 0.0) !(frame.first[0, 0] <= cornerCoordinates[i][0, 0]).xor(m[0, 0] <= cornerCoordinates[i][0, 0])
+                else if (dxdy[1, 0] == 0.0) !(frame.first[1, 0] <= cornerCoordinates[i][1, 0]).xor(m[1, 0] <= cornerCoordinates[i][1, 0])
+                else !(frame.first[1, 0] - cornerCoordinates[i][1, 0] <= (dxdy[1, 0] / dxdy[0, 0]) * (frame.first[0, 0] - cornerCoordinates[i][0, 0])).xor(
+                    m[1, 0] - cornerCoordinates[i][1, 0] <= (dxdy[1, 0] / dxdy[0, 0]) * (m[0, 0] - cornerCoordinates[i][0, 0])
+                )
             }
         }
         // caluclate xy coordinates of bot
-        val corners = obj.cornerVector.map { LinearAlgebra.rotationMatrixR2(obj.frame.second)*it + obj.frame.first}.toList()
-        l.zip(corners).map { (f,p) ->  f(p) }.filter { it }.ifEmpty { return true } //note this only compares obj's corners to the obstacle, we also need to check center and compare corners with each other
-        return false;
+        val corners = obj.cornerVector.map { LinearAlgebra.rotationMatrixR2(obj.frame.second) * it + obj.frame.first }
+            .toMutableList()
+        corners.add(obj.frame.first)
+
+        for (corner in corners) {
+            if (!obsf.map { it(corner) }.contains(false)) return true
+        }
+
+        corners.removeLast()
+        val botsf: MutableList<(Matrix) -> Boolean> = mutableListOf()
+
+        for (i in 0..<corners.size) {
+            botsf.add { m: Matrix ->
+                val dxdy = corners[(i + 1) % corners.size] - corners[i]
+                if (dxdy[0, 0] == 0.0) !(obj.frame.first[0, 0] <= corners[i][0, 0]).xor(m[0, 0] <= corners[i][0, 0])
+                else if (dxdy[1, 0] == 0.0) !(obj.frame.first[1, 0] <= corners[i][1, 0]).xor(m[1, 0] <= corners[i][1, 0])
+                else !(obj.frame.first[1, 0] - corners[i][1, 0] <= (dxdy[1, 0] / dxdy[0, 0]) * (obj.frame.first[0, 0] - corners[i][0, 0])).xor(
+                    m[1, 0] - corners[i][1, 0] <= (dxdy[1, 0] / dxdy[0, 0]) * (m[0, 0] - corners[i][0, 0])
+                )
+            }
+        }
+
+        cornerCoordinates.add(frame.first)
+        for (corner in cornerCoordinates) {
+            if (!botsf.map {it(corner)}.contains(false)) return true
+        }
+        cornerCoordinates.removeLast()
+
+        return false;// don't collide
     }
+}
+
+fun main() {
+    val obs = SquareObstacle(Pair(Matrix(0.0, 0.0), 0.0), 20.0, 20.0)
+    val bot = Bot(
+        Pair(Matrix(0.0, 0.0), 0.0),
+        mutableListOf(Pair(10.0, 10.0), Pair(10.0, -10.0), Pair(-10.0, -10.0), Pair(-10.0, 10.0)),
+        botColor = Color.BLUE
+    )
+    Drawer(500, 500, 0.2)
+    bot.teleport(Pair(Matrix(20.0, 15.0), PI / 4))
+    bot.draw()
+    obs.draw()
+    if (obs.isCollision(bot)) println("they collide") else println("they don't collide")
 }
