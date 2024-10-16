@@ -29,7 +29,7 @@ class A1C3 {
 
             val path = Path<Pose>()
 
-            val steps = 10
+            val steps = 100
             for (i in 0..steps) {
                 path.path.add(
                     Pose(
