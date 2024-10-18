@@ -1,17 +1,18 @@
 import edu.princeton.cs.introcs.StdDraw
 import java.awt.Color
+import java.util.LinkedList
 import java.util.PriorityQueue
 import kotlin.math.PI
-import kotlin.math.min
+import kotlin.math.abs
 import kotlin.math.sqrt
 import kotlin.random.Random
 
-data class Sample(
+data class SampleFB(
     val id: Int,
     val pose: Pair<Matrix, Double>,
-    val edges: HashSet<Sample> = HashSet(),
+    val edges: HashSet<SampleFB> = HashSet(),
     var cost: Double? = null,
-    var cameFrom: Sample? = null
+    var cameFrom: SampleFB? = null
 ) {
     override fun hashCode(): Int {
         return id
@@ -21,7 +22,7 @@ data class Sample(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as Sample
+        other as SampleFB
 
         return id == other.id
     }
@@ -31,14 +32,44 @@ data class Sample(
     }
 }
 
+data class SampleArm(
+    val id: Int,
+    val pose: Pair<Double, Double>,
+    val edges: HashSet<SampleArm> = HashSet(),
+    var cost: Double? = null,
+    var cameFrom: SampleArm? = null
+) {
+    override fun hashCode(): Int {
+        return id
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as SampleArm
+
+        return id == other.id
+    }
+
+    override fun toString(): String {
+        return id.toString()
+    }
+
+}
+
 class Component4 {
-    fun euclidianDist(p1: Sample, p2: Sample): Double = sqrt(
+    fun euclidianDist(p1: SampleFB, p2: SampleFB): Double = sqrt(
         (p1.pose.first[0, 0] - p2.pose.first[0, 0]) * (p1.pose.first[0, 0] - p2.pose.first[0, 0]) + (p1.pose.first[1, 0] - p2.pose.first[1, 0]) * (p1.pose.first[1, 0] - p2.pose.first[1, 0])
     )
 
+    // sum of the differences in angles of arm
+    fun rotDist(p1: SampleArm, p2: SampleArm): Double =
+        abs(p1.pose.first - p2.pose.first) % (2 * PI) + abs(p1.pose.second - p2.pose.second) % (2 * PI)
+
     //plan is to get this working for free bodies and then generalize to arms
     fun prmFB(start: Pair<Matrix, Double>, goal: Pair<Matrix, Double>, env: Environment, bot: Bot) {
-        val samples = mutableListOf<Sample>()
+        val sampleFBS = mutableListOf<SampleFB>()
         val ghost = bot // should be bot.clone() deep copy of bot
 
         Component1.visualize_scene(env)
@@ -46,16 +77,16 @@ class Component4 {
 
         for (i in 0..<500) {
             // add samples
-            val smp = Sample(
+            val smp = SampleFB(
                 i, Pair(
                     Matrix(Random.nextDouble(-100.0, 100.0), Random.nextDouble(-100.0, 100.0)),
                     Random.nextDouble(0.0, 2 * PI)
                 )
             )
-            samples.add(smp)
+            sampleFBS.add(smp)
 
             //connect samples
-            for (p in nearestNeighborsFB(smp.pose, samples, 200.0, 6)) {
+            for (p in nearestNeighborsFB(smp.pose, sampleFBS, 50.0, 6)) {
                 if (collisionFreeFB(ghost, smp, p, env)) {
                     smp.edges.add(p)
                     p.edges.add(smp)
@@ -65,7 +96,7 @@ class Component4 {
         }
 
         // draw the tree
-        for (s in samples) {
+        for (s in sampleFBS) {
             StdDraw.setPenColor(Color.ORANGE)
             StdDraw.filledSquare(s.pose.first[0, 0], s.pose.first[1, 0], 0.5)
             for (l in s.edges) {
@@ -73,33 +104,33 @@ class Component4 {
             }
         }
         StdDraw.setPenColor(Color.BLACK)
-        StdDraw.filledCircle(start.first[0,0],start.first[1,0],1.0)
-        StdDraw.filledCircle(goal.first[0,0],goal.first[1,0],1.0)
+        StdDraw.filledCircle(start.first[0, 0], start.first[1, 0], 1.0)
+        StdDraw.filledCircle(goal.first[0, 0], goal.first[1, 0], 1.0)
         // A* section
-        val closed = HashSet<Sample>()
+        val closed = HashSet<SampleFB>()
         // add start and goal as samples
-        val goalSample = Sample(-1, goal)
-        nearestNeighborsFB(goal, samples, 200.0, 6).filter { collisionFreeFB(bot, goalSample, it, env) }.forEach {
-            it.edges.add(goalSample)
-            goalSample.edges.add(it)
+        val goalSampleFB = SampleFB(-1, goal)
+        nearestNeighborsFB(goal, sampleFBS, 50.0, 6).filter { collisionFreeFB(bot, goalSampleFB, it, env) }.forEach {
+            it.edges.add(goalSampleFB)
+            goalSampleFB.edges.add(it)
         }
 
-        val startSample = Sample(-2, start,cost = 0.0)
-        nearestNeighborsFB(start, samples, 200.0, 6).filter { collisionFreeFB(bot, it, startSample, env) }.forEach {
-            it.edges.add(startSample)
-            startSample.edges.add(it)
+        val startSampleFB = SampleFB(-2, start, cost = 0.0)
+        nearestNeighborsFB(start, sampleFBS, 50.0, 6).filter { collisionFreeFB(bot, it, startSampleFB, env) }.forEach {
+            it.edges.add(startSampleFB)
+            startSampleFB.edges.add(it)
         }
 
-        val open = PriorityQueue<Sample> { a, b ->
-            if (a.cost!! + euclidianDist(a, goalSample) < b.cost!! + euclidianDist(a, goalSample)) -1
+        val open = PriorityQueue<SampleFB> { a, b ->
+            if (a.cost!! + euclidianDist(a, goalSampleFB) < b.cost!! + euclidianDist(a, goalSampleFB)) -1
             else 1
         }
-        val openHS = HashSet<Sample>()
+        val openHS = HashSet<SampleFB>()
 
 
-        var cur = startSample
-        open.add(startSample)
-        while (cur != goalSample && open.isNotEmpty()) {
+        var cur = startSampleFB
+        open.add(startSampleFB)
+        while (cur != goalSampleFB && open.isNotEmpty()) {
             cur = open.remove()
             closed.add(cur)
             openHS.remove(cur)
@@ -110,9 +141,9 @@ class Component4 {
                         it.cost = cur.cost!! + euclidianDist(cur, it)
                         it.cameFrom = cur
                     } else {
-                        if (euclidianDist(cur,it) + cur.cost!! < it.cost!!) {
+                        if (euclidianDist(cur, it) + cur.cost!! < it.cost!!) {
                             open.remove(it)
-                            it.cost = euclidianDist(cur,it) + cur.cost!!
+                            it.cost = euclidianDist(cur, it) + cur.cost!!
                             open.add(it)
                             it.cameFrom = cur
                         }
@@ -125,32 +156,51 @@ class Component4 {
             }
 
         }
-        if (cur != goalSample) println("no path found").also { return }
+        if (cur != goalSampleFB) println("no path found").also { return }
         // draw path
         StdDraw.setPenColor(Color.RED)
-        while (cur != startSample) {
-            StdDraw.line(cur.pose.first[0,0],cur.pose.first[1,0], cur.cameFrom!!.pose.first[0,0], cur.cameFrom!!.pose.first[1,0])
+        val ll = LinkedList<SampleFB>()
+        while (cur != startSampleFB) {
+            ll.addFirst(cur)
+            StdDraw.line(
+                cur.pose.first[0, 0],
+                cur.pose.first[1, 0],
+                cur.cameFrom!!.pose.first[0, 0],
+                cur.cameFrom!!.pose.first[1, 0]
+            )
             cur = cur.cameFrom!!
         }
+        ll.addFirst(startSampleFB)
+
+        for (i in 0..<ll.size - 1) {
+            A1C3.interpolate_rigid_body(
+                Matrix(ll.get(i).pose.first[0, 0], ll.get(i).pose.first[1, 0], ll.get(i).pose.second),
+                Matrix(ll.get(i + 1).pose.first[0, 0], ll.get(i + 1).pose.first[1, 0], ll.get(i + 1).pose.second)
+            ).path.forEach {
+                bot.teleport(Pair(Matrix(it.x, it.y), it.theta))
+                bot.draw()
+            }
+        }
+
         println("complete")
     }
 
     // search of the nearest neighbors
     private fun nearestNeighborsFB(
-        p1: Pair<Matrix, Double>, samples: MutableList<Sample>, r: Double, neighborNumber: Int
-    ): MutableList<Sample> {
-        val n = mutableListOf<Sample>()
-        val d: (Sample) -> Double = { s: Sample ->
+        p1: Pair<Matrix, Double>, sampleFBS: MutableList<SampleFB>, r: Double, neighborNumber: Int
+    ): MutableList<SampleFB> {
+        val n = mutableListOf<SampleFB>()
+        val d: (SampleFB) -> Double = { s: SampleFB ->
             sqrt((p1.first[0, 0] - s.pose.first[0, 0]) * (p1.first[0, 0] - s.pose.first[0, 0]) + (p1.first[1, 0] - s.pose.first[1, 0]) * (p1.first[1, 0] - s.pose.first[1, 0]))
         }
 
-        val comparator = Comparator<Sample> { a, b ->
+        val comparator = Comparator<SampleFB> { a, b ->
             if (d(a) < d(b)) -1
             else 1
         }
         val pq = PriorityQueue(comparator)
 
-        pq.addAll(samples) // this is inefficient
+        pq.addAll(sampleFBS) // this is inefficient
         while (n.size <= neighborNumber && pq.size > 0) {
             val sp = pq.remove()
             if (d(sp) < r) n.add(sp)
@@ -159,7 +209,7 @@ class Component4 {
     }
 
     // returns true if there is no collision along path between two points
-    fun collisionFreeFB(ghost: Bot, p1: Sample, p2: Sample, env: Environment): Boolean {
+    fun collisionFreeFB(ghost: Bot, p1: SampleFB, p2: SampleFB, env: Environment): Boolean {
         ghost.teleport(p1.pose)
         return !A1C3.interpolate_rigid_body(
             Matrix(p1.pose.first[0, 0], p1.pose.first[1, 0], p1.pose.second),
@@ -178,7 +228,8 @@ fun main() {
         Pair(Matrix(-100.0, -100.0), 0.0), Pair(Matrix(100.0, 100.0), 0.0), Component1.generate_enviroment(27), Bot(
             Pair(Matrix(0.0, 0.0), 0.0),
             mutableListOf(Pair(1.5, -2.5), Pair(-1.5, -2.5), Pair(-1.5, 2.5), Pair(1.5, 2.5)),
-            botColor = Color.ORANGE
+            botColor = Color.MAGENTA,
+            displayFrame = false
         )
     )
 }

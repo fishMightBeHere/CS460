@@ -11,6 +11,7 @@ class Bot(
     endEffector: Matrix? = null,
     private val botColor: Color,
     val root: Bot? = null,
+    var displayFrame:Boolean = true
 ) {
     val cornerVector: MutableList<Matrix> = mutableListOf()
     var vectorToEndEffector: Pair<Matrix, Double>? = null
@@ -58,24 +59,25 @@ class Bot(
             StdDraw.setPenColor(Color.GREEN)
         }
 
-        // draw frame
-        StdDraw.circle(frameXY[0, 0], frameXY[1, 0], 5.0)
-        //draw positive x axis
-        StdDraw.setPenColor(Color.RED)
-        StdDraw.line(
-            frameXY[0, 0],
-            frameXY[1, 0],
-            (rot * Matrix(10.0, 0.0) + frameXY)[0, 0],
-            (rot * Matrix(10.0, 0.0) + frameXY)[1, 0]
-        )
-        //draw positive y axis
-        StdDraw.setPenColor(Color.GREEN)
-        StdDraw.line(
-            frameXY[0, 0],
-            frameXY[1, 0],
-            (rot * Matrix(0.0, 10.0) + frameXY)[0, 0],
-            (rot * Matrix(0.0, 10.0) + frameXY)[1, 0]
-        )
+        if (displayFrame) {// draw frame
+            StdDraw.circle(frameXY[0, 0], frameXY[1, 0], 5.0)
+            //draw positive x axis
+            StdDraw.setPenColor(Color.RED)
+            StdDraw.line(
+                frameXY[0, 0],
+                frameXY[1, 0],
+                (rot * Matrix(10.0, 0.0) + frameXY)[0, 0],
+                (rot * Matrix(10.0, 0.0) + frameXY)[1, 0]
+            )
+            //draw positive y axis
+            StdDraw.setPenColor(Color.GREEN)
+            StdDraw.line(
+                frameXY[0, 0],
+                frameXY[1, 0],
+                (rot * Matrix(0.0, 10.0) + frameXY)[0, 0],
+                (rot * Matrix(0.0, 10.0) + frameXY)[1, 0]
+            )
+        }
 
         if (transformedEF != null) {//draw endEffectors
             val (efm, t) = transformedEF!!
@@ -117,23 +119,23 @@ class Bot(
         }
         frame = Pair(frameXY, theta)
 
-        val rot = Matrix(2, 2)
-        rot[0, 0] = cos(v.second)
-        rot[0, 1] = -sin(v.second)
-        rot[1, 0] = sin(v.second)
-        rot[1, 1] = cos(v.second)
 
         if (vectorToEndEffector != null) {//rotates vectors pointing to end effectors
             val (efXY, thetaEF) = vectorToEndEffector!!
-            val frameRot = Matrix(doubleArrayOf(cos(theta), -sin(theta)), doubleArrayOf(sin(theta), cos(theta)))
+            val frameRot = LinearAlgebra.rotationMatrixR2(theta)
             vectorToEndEffector = Pair(efXY,thetaEF+v.second)
             transformedEF= Pair(frameRot*efXY+frameXY,thetaEF+v.second)
         }
-
     }
 
     fun teleport(f: Pair<Matrix, Double>) {
-        frame = f
+        if (root != null) {
+            frame = Pair(root.vectorToEndEffector!!.first, f.second)
+            if (vectorToEndEffector != null) {
+                vectorToEndEffector = Pair(vectorToEndEffector!!.first, f.second)
+                transformedEF = Pair(LinearAlgebra.rotationMatrixR2(f.second)*vectorToEndEffector!!.first+frame.first,f.second)
+            }
+        } else frame = f
     }
 
     fun update() {
@@ -142,6 +144,10 @@ class Bot(
 
     fun rotate(theta:Double) {
         move(Pair(Matrix(0.0, 0.0),theta))
+    }
+
+    fun rotateTeleport(theta:Double) {
+        teleport(Pair(Matrix(0.0,0.0),theta))
     }
 
     fun getEndEffector(): Pair<Matrix, Double>? {
