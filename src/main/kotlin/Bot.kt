@@ -4,18 +4,17 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 // frame: Matrix [x,y] | theta relative to origin
-// endEffector : Matrix [x,y,theta] relative to origin, like a point but with a rotation, theta of end effector should be the same as frame to prevent confusion
+// endEffector : Matrix [x,y], theta relative to origin, like a point but with a rotation, theta of end effector should be the same as frame to prevent confusion
 class Bot(
     var frame: Pair<Matrix, Double>,
     points: List<Pair<Double, Double>>,
-    endEffector: Matrix? = null,
+    endEffector: Pair<Matrix, Double>? = null,
     private val botColor: Color,
     val root: Bot? = null,
-    var displayFrame:Boolean = true
+    var displayFrame: Boolean = true
 ) {
     val cornerVector: MutableList<Matrix> = mutableListOf()
     var vectorToEndEffector: Pair<Matrix, Double>? = null
-    var transformedEF: Pair<Matrix,Double>? = null
 
     init {
         // set vectors from frame towards the 4 corners
@@ -25,12 +24,15 @@ class Bot(
         if (endEffector != null) {
             vectorToEndEffector = Pair(
                 Matrix(
-                    endEffector[0, 0] - frame.first[0, 0],
-                    endEffector[1, 0] - frame.first[1, 0]
-                ), endEffector[2, 0])
-            transformedEF = Pair(Matrix(endEffector[0, 0] - frame.first[0, 0], endEffector[1, 0] - frame.first[1, 0]), endEffector[2, 0])
+                    endEffector.first[0, 0] - frame.first[0, 0],
+                    endEffector.first[1, 0] - frame.first[1, 0]
+                ), endEffector.second
+            )
         }
-        if (root != null) frame = root.getEndEffector()!!
+        if (root != null) frame = Pair(
+            LinearAlgebra.rotationMatrixR2(root.frame.second) * root.vectorToEndEffector!!.first + root.frame.first,
+            root.frame.second
+        )
     }
 
     fun draw() {
@@ -79,8 +81,9 @@ class Bot(
             )
         }
 
-        if (transformedEF != null) {//draw endEffectors
-            val (efm, t) = transformedEF!!
+        if (vectorToEndEffector != null) {//draw endEffectors
+            val efm = LinearAlgebra.rotationMatrixR2(frame.second) * vectorToEndEffector!!.first + frame.first
+            val t = frame.second
             StdDraw.setPenColor(Color.BLUE)
             StdDraw.circle(efm[0, 0], efm[1, 0], 5.0)
             StdDraw.setPenColor(Color.RED)
@@ -109,10 +112,13 @@ class Bot(
     fun move(v: Pair<Matrix, Double>) {
         var (frameXY, theta) = frame
         if (root != null) {
-            root.vectorToEndEffector = Pair(root.vectorToEndEffector!!.first, root.vectorToEndEffector!!.second+v.second)
+            root.vectorToEndEffector =
+                Pair(root.vectorToEndEffector!!.first, root.vectorToEndEffector!!.second + v.second)
 
-            frameXY = root.transformedEF!!.first
+            frameXY =
+                LinearAlgebra.rotationMatrixR2(root.frame.second) * root.vectorToEndEffector!!.first + root.frame.first
             theta = root.vectorToEndEffector!!.second
+            root.vectorToEndEffector = Pair(root.vectorToEndEffector!!.first, theta)
         } else {
             frameXY += v.first
             theta += v.second
@@ -122,35 +128,35 @@ class Bot(
 
         if (vectorToEndEffector != null) {//rotates vectors pointing to end effectors
             val (efXY, thetaEF) = vectorToEndEffector!!
-            val frameRot = LinearAlgebra.rotationMatrixR2(theta)
-            vectorToEndEffector = Pair(efXY,thetaEF+v.second)
-            transformedEF= Pair(frameRot*efXY+frameXY,thetaEF+v.second)
+            vectorToEndEffector = Pair(efXY, thetaEF + v.second)
         }
     }
 
     fun teleport(f: Pair<Matrix, Double>) {
+        if (vectorToEndEffector != null) {
+            val localPose =  vectorToEndEffector!!.second - frame.second
+            vectorToEndEffector = Pair(vectorToEndEffector!!.first,f.second+ localPose)
+        }
         if (root != null) {
-            frame = Pair(root.vectorToEndEffector!!.first, f.second)
-            if (vectorToEndEffector != null) {
-                vectorToEndEffector = Pair(vectorToEndEffector!!.first, f.second)
-                transformedEF = Pair(LinearAlgebra.rotationMatrixR2(f.second)*vectorToEndEffector!!.first+frame.first,f.second)
-            }
+            frame = Pair(
+                LinearAlgebra.rotationMatrixR2(root.frame.second) * root.vectorToEndEffector!!.first + root.frame.first,
+                root.frame.second + f.second
+            )
+            root.vectorToEndEffector = Pair(root.vectorToEndEffector!!.first,root.frame.second + f.second)
+
         } else frame = f
+
     }
 
     fun update() {
-        move(Pair(Matrix(0.0, 0.0),0.0))
+        move(Pair(Matrix(0.0, 0.0), 0.0))
     }
 
-    fun rotate(theta:Double) {
-        move(Pair(Matrix(0.0, 0.0),theta))
+    fun rotate(theta: Double) {
+        move(Pair(Matrix(0.0, 0.0), theta))
     }
 
-    fun rotateTeleport(theta:Double) {
-        teleport(Pair(Matrix(0.0,0.0),theta))
-    }
-
-    fun getEndEffector(): Pair<Matrix, Double>? {
-        return transformedEF
+    fun rotateTeleport(theta: Double) {
+        teleport(Pair(Matrix(0.0, 0.0), theta))
     }
 }
