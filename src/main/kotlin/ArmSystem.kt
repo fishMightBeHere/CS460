@@ -1,16 +1,21 @@
 import java.awt.Color
 import kotlin.math.PI
 
-class ArmSystem (val arms: List<Bot>, localPose: MutableList<Double> = mutableListOf()) {
-    fun update() {
-        arms.forEach {it.update()}
-    }
+class ArmSystem (val arms: List<Bot>) {
 
     fun teleport(vararg poses:Double) {
-        var globalPose = 0.0
-        for ((arm, pose) in arms.zip(poses.toList())) {
-            arm.teleport(Pair(Matrix(0.0,0.0),pose))
+        require(poses.size == arms.size)
+        for (i in arms.indices) {
+            arms[i].teleport(Pair(Matrix(0.0,0.0),poses[i]))
+            // update all child arms
+            for (j in i+1..<arms.size) {
+                arms[j].update()
+            }
         }
+    }
+
+    fun draw() {
+        arms.forEach(Bot::draw)
     }
 }
 
@@ -29,49 +34,11 @@ fun main() {
     )
 
     Drawer(500,500,200,200,1.0)
-    l2.update()
-    l1.draw()
-    l2.draw()
+    val arms = ArmSystem(listOf(l1,l2))
+    arms.teleport(0.0,PI/4)
+    arms.draw()
 
-    /*l1.rotate(PI/4)
-    l2.update()
-    l1.draw()
-    l2.draw()
+    arms.teleport(PI/4,-PI/4)
+    arms.draw()
 
-    l2.rotate(-PI/4)
-    l1.draw()
-    l2.draw()
-
-    l1.rotate(PI/2)
-    l2.update()
-    l1.draw()
-    l2.draw()*/
-
-    l1.rotateTeleport(PI/2)
-    l2.update()
-    l1.draw()
-    l2.draw()
-
-    l2.rotateTeleport(-PI/4)
-    l1.draw()
-    l2.draw()
-
-    l2.rotateTeleport(PI/4)
-    l1.draw()
-    l2.draw()
-
-    l1.rotateTeleport(-PI/2)
-    l2.update()
-    l1.draw()
-    l2.draw()
-
-    l1.rotateTeleport(0.0)
-    l2.update()
-    l1.draw()
-    l2.draw()
-
-    l1.rotateTeleport(-PI)
-    l2.update()
-    l1.draw()
-    l2.draw()
 }

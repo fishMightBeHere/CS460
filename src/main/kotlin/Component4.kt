@@ -55,7 +55,6 @@ data class SampleArm(
     override fun toString(): String {
         return id.toString()
     }
-
 }
 
 class Component4 {
@@ -73,7 +72,8 @@ class Component4 {
         val ghost = bot // should be bot.clone() deep copy of bot
 
         Component1.visualize_scene(env)
-
+        val goalSampleFB = SampleFB(-1, goal)
+        val startSampleFB = SampleFB(-2, start, cost = 0.0)
 
         for (i in 0..<500) {
             // add samples
@@ -86,13 +86,13 @@ class Component4 {
             sampleFBS.add(smp)
 
             //connect samples
-            for (p in nearestNeighborsFB(smp.pose, sampleFBS, 50.0, 6)) {
+            for (p in nearestNeighborsFB(smp, sampleFBS, 50.0, 6)) {
                 if (collisionFreeFB(ghost, smp, p, env)) {
                     smp.edges.add(p)
                     p.edges.add(smp)
                 }
             }
-            println(i)
+            println("Sample : $i")
         }
 
         // draw the tree
@@ -106,27 +106,24 @@ class Component4 {
         StdDraw.setPenColor(Color.BLACK)
         StdDraw.filledCircle(start.first[0, 0], start.first[1, 0], 1.0)
         StdDraw.filledCircle(goal.first[0, 0], goal.first[1, 0], 1.0)
+
         // A* section
         val closed = HashSet<SampleFB>()
         // add start and goal as samples
-        val goalSampleFB = SampleFB(-1, goal)
-        nearestNeighborsFB(goal, sampleFBS, 50.0, 6).filter { collisionFreeFB(bot, goalSampleFB, it, env) }.forEach {
+
+        nearestNeighborsFB(goalSampleFB, sampleFBS, 50.0, 6).filter { collisionFreeFB(bot, goalSampleFB, it, env) }.forEach {
             it.edges.add(goalSampleFB)
             goalSampleFB.edges.add(it)
         }
-
-        val startSampleFB = SampleFB(-2, start, cost = 0.0)
-        nearestNeighborsFB(start, sampleFBS, 50.0, 6).filter { collisionFreeFB(bot, it, startSampleFB, env) }.forEach {
+        nearestNeighborsFB(startSampleFB, sampleFBS, 50.0, 6).filter { collisionFreeFB(bot, it, startSampleFB, env) }.forEach {
             it.edges.add(startSampleFB)
             startSampleFB.edges.add(it)
         }
-
         val open = PriorityQueue<SampleFB> { a, b ->
             if (a.cost!! + euclidianDist(a, goalSampleFB) < b.cost!! + euclidianDist(a, goalSampleFB)) -1
             else 1
         }
         val openHS = HashSet<SampleFB>()
-
 
         var cur = startSampleFB
         open.add(startSampleFB)
@@ -154,9 +151,9 @@ class Component4 {
                     openHS.add(it)
                 }
             }
-
         }
         if (cur != goalSampleFB) println("no path found").also { return }
+
         // draw path
         StdDraw.setPenColor(Color.RED)
         val ll = LinkedList<SampleFB>()
@@ -186,24 +183,21 @@ class Component4 {
     }
 
     // search of the nearest neighbors
-    private fun nearestNeighborsFB(
-        p1: Pair<Matrix, Double>, sampleFBS: MutableList<SampleFB>, r: Double, neighborNumber: Int
+    private fun  nearestNeighborsFB(
+        p1: SampleFB, samples: MutableList<SampleFB>, r: Double, neighborNumber: Int
     ): MutableList<SampleFB> {
         val n = mutableListOf<SampleFB>()
-        val d: (SampleFB) -> Double = { s: SampleFB ->
-            sqrt((p1.first[0, 0] - s.pose.first[0, 0]) * (p1.first[0, 0] - s.pose.first[0, 0]) + (p1.first[1, 0] - s.pose.first[1, 0]) * (p1.first[1, 0] - s.pose.first[1, 0]))
-        }
 
         val comparator = Comparator<SampleFB> { a, b ->
-            if (d(a) < d(b)) -1
+            if (euclidianDist(a,p1) < euclidianDist(b,p1)) -1
             else 1
         }
-        val pq = PriorityQueue(comparator)
 
-        pq.addAll(sampleFBS) // this is inefficient
+        val pq = PriorityQueue(comparator)
+        pq.addAll(samples) // this is inefficient
         while (n.size <= neighborNumber && pq.size > 0) {
             val sp = pq.remove()
-            if (d(sp) < r) n.add(sp)
+            if (euclidianDist(sp,p1) < r) n.add(sp)
         }
         return n
     }
