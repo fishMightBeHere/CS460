@@ -2,11 +2,6 @@ import java.io.File
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-/*
-* todo
-*  add localpose to arm type bots
-* */
-
 enum class BotTypes() { FREEBODY, ARM }
 
 class Component2 {

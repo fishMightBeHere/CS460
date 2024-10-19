@@ -1,5 +1,6 @@
 import edu.princeton.cs.introcs.StdDraw
 import java.awt.Color
+import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -135,7 +136,7 @@ class Bot(
     fun teleport(f: Pair<Matrix, Double>) {
         if (vectorToEndEffector != null) {
             val localPose =  vectorToEndEffector!!.second - frame.second
-            vectorToEndEffector = Pair(vectorToEndEffector!!.first,f.second+ localPose)
+            vectorToEndEffector = Pair(vectorToEndEffector!!.first,(f.second+ localPose)%(2*PI))
         }
         if (root != null) {
             frame = Pair(

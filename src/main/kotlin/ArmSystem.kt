@@ -35,8 +35,8 @@ fun main() {
 
     Drawer(500,500,200,200,1.0)
     val arms = ArmSystem(listOf(l1,l2))
-    arms.teleport(0.0,PI/4)
-    arms.draw()
+    //arms.teleport(0.0,PI/4)
+    //arms.draw()
 
     arms.teleport(PI/4,-PI/4)
     arms.draw()

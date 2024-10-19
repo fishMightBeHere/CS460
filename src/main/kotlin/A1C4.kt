@@ -1,5 +1,6 @@
 import edu.princeton.cs.introcs.StdDraw
 import java.awt.Color
+import java.util.stream.IntStream
 import kotlin.math.PI
 
 typealias Vector = Matrix
@@ -25,6 +26,7 @@ class A1C4 {
     //bot length 1 is 2, bot2 is 1.5
 
     //[t1, t2], [t1,t2]
+    @Deprecated("this method sucks, use the other interpolate_arm please")
     fun interpolate_arm(start: Vector, goal: Vector): ArmPath {
         val step = 0.1
         val p = ArmPath(mutableListOf())
@@ -73,6 +75,20 @@ class A1C4 {
         }
     }
 
+    companion object {
+        fun interpolate_arm(start: List<Double>, goal: List<Double>, samples: Int): List<List<Double>> {
+            require(start.size == goal.size) { "Dimensionality of start is ${start.size} and end is ${goal.size}" }
+            val dTheta = start.zip(goal).map { (s, g) -> g - s }.toList()
+            val ret = mutableListOf<List<Double>>()
+
+            IntStream.range(0, samples).forEach { i ->
+                ret.add(
+                    start.zip(dTheta).map { (t, dt) -> t + i * (dt / samples) }.toList()
+                )
+            }
+            return ret
+        }
+    }
 }
 
 fun main() {
@@ -84,12 +100,12 @@ fun main() {
     c4.visualize_arm_path(
         Path(
             mutableListOf(
-                Pair(PI/4,0.0),
-                Pair(-PI / 4,-PI/4),
-                Pair(0.0,0.0),
-                Pair(PI,0.0),
-                Pair(0.0,PI),
-                Pair(0.0,0.0)
+                Pair(PI / 4, 0.0),
+                Pair(-PI / 4, -PI / 4),
+                Pair(0.0, 0.0),
+                Pair(PI, 0.0),
+                Pair(0.0, PI),
+                Pair(0.0, 0.0)
             )
         )
     )
