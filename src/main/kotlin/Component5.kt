@@ -135,7 +135,7 @@ class Component5 {
         samples.add(startSample)
         for (i in 0..<1000) {
             val smp = SampleArm(i, Pair(Random.nextDouble(-2 * PI, 2 * PI), Random.nextDouble(-2 * PI, 2 * PI)))
-            val nn = Component4().nearestNeighborsArm(smp, samples, 10.0, 1,5.0)
+            val nn = Component4().nearestNeighborsArm(smp, samples, 40.0, 1,5.0)
             if (nn.size > 0 && Component4().collisionFreeArm(arms, smp, nn[0], env)) {
                 samples.add(smp)
                 nn[0].edges.add(smp)
@@ -143,7 +143,7 @@ class Component5 {
             println(i)
         }
 
-        Component4().nearestNeighborsArm(goalSample, samples, 10.0, 5,5.0).forEach {
+        Component4().nearestNeighborsArm(goalSample, samples, 40.0, 5,5.0).forEach {
             if (Component4().collisionFreeArm(arms,it,goalSample,env)) {
                 it.edges.add(goalSample)
                 return@forEach
@@ -206,16 +206,16 @@ class Component5 {
 fun main() {
     Drawer(750, 750, 200, 200, 1.1)
 
-    /*Component5().rrtFB(
+    Component5().rrtFB(
         Pair(Matrix(-100.0, -100.0), 0.0), Pair(Matrix(100.0, 100.0), 0.0), Component1.generate_enviroment(27), Bot(
             Pair(Matrix(0.0, 0.0), 0.0),
             mutableListOf(Pair(1.5, -2.5), Pair(-1.5, -2.5), Pair(-1.5, 2.5), Pair(1.5, 2.5)),
             botColor = Color.MAGENTA,
             displayFrame = false
         )
-    )*/
+    )
 
-    val l1 = Bot(
+    /*val l1 = Bot(
         frame = Pair(Matrix(0.0, 0.0), 0.0),
         points = listOf(Pair(5.0, -10.0), Pair(5.0, 10.0), Pair(-5.0, 10.0), Pair(-5.0, -10.0)),
         endEffector = Pair(Matrix(0.0, 10.0), 0.0),
@@ -237,7 +237,7 @@ fun main() {
         Pair(-3 * PI / 4, 0.0),
         Environment(obstacles = mutableListOf(SquareObstacle(Pair(Matrix(27.0,0.0),0.0),10.0,5.0))),
         arms
-    )
+    )*/
 }
 
 
