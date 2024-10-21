@@ -67,8 +67,8 @@ class Component4 {
     )
 
     // sum of the differences in angles of arm, it's difficult to measure the cost between moving two poses, but we say that moving the root arm is more expensive (2 times) than the second arm
-    fun rotDist(p1: SampleArm, p2: SampleArm): Double =
-        2 * abs(p1.pose.first - p2.pose.first) + abs(p1.pose.second - p2.pose.second)
+    fun rotDist(p1: SampleArm, p2: SampleArm, scaleFactor: Double = 2.0): Double =
+        scaleFactor * abs(p1.pose.first - p2.pose.first) + abs(p1.pose.second - p2.pose.second)
 
     //plan is to get this working for free bodies and then generalize to arms
     fun prmFB(start: Pair<Matrix, Double>, goal: Pair<Matrix, Double>, env: Environment, bot: Bot) {
@@ -194,7 +194,10 @@ class Component4 {
         val ghost = arms
 
         Component1.visualize_scene(env)
-        val goalSample = SampleArm(-1, goal)
+        val adjustedGoal1 = if (goal.first > PI) goal.first-(2*PI) else if (goal.first < -PI) goal.first+(2*PI) else goal.first
+        val adjustedGoal2 = if (goal.second > PI) goal.second-(2*PI) else if (goal.second < -PI) goal.second+(2*PI) else goal.second
+
+        val goalSample = SampleArm(-1, Pair(adjustedGoal1,adjustedGoal2))
         val startSample = SampleArm(-2, start, cost = 0.0)
 
         for (i in 0..<500) {
@@ -268,7 +271,7 @@ class Component4 {
         ll.addFirst(startSample)
 
         for (i in 0..<ll.size - 1) {
-            A1C4.interpolate_arm(ll.get(i).pose.toList(), ll.get(i + 1).pose.toList(), 100).forEach {
+            A1C4.interpolate_arm(ll[i].pose.toList(), ll[i + 1].pose.toList(), 100).forEach {
                 arms.teleport(*it.toDoubleArray())
                 arms.draw()
             }
@@ -278,7 +281,7 @@ class Component4 {
 
 
     // search of the nearest neighbors
-    private fun nearestNeighborsFB(
+    fun nearestNeighborsFB(
         p1: SampleFB, samples: MutableList<SampleFB>, r: Double, neighborNumber: Int
     ): MutableList<SampleFB> {
         val n = mutableListOf<SampleFB>()
@@ -291,20 +294,21 @@ class Component4 {
         pq.addAll(samples) // this is inefficient
         while (n.size <= neighborNumber && pq.size > 0) {
             val sp = pq.remove()
-            if (euclidianDist(sp, p1) < r) n.add(sp)
+            if (p1.id != sp.id && euclidianDist(sp, p1) < r) n.add(sp)
         }
         return n
     }
 
-    private fun nearestNeighborsArm(
+    fun nearestNeighborsArm(
         p1: SampleArm,
         samples: MutableList<SampleArm>,
         r: Double,
-        neighborNumber: Int
+        neighborNumber: Int,
+        scaleFactor: Double = 2.0
     ): MutableList<SampleArm> {
         val n = mutableListOf<SampleArm>()
         val comparator = Comparator<SampleArm> { a, b ->
-            if (rotDist(a, p1) < rotDist(b, p1)) -1
+            if (rotDist(a, p1,scaleFactor) < rotDist(b, p1,scaleFactor)) -1
             else 1
         }
 
@@ -312,7 +316,7 @@ class Component4 {
         pq.addAll(samples)
         while (n.size <= neighborNumber && pq.size > 0) {
             val sp = pq.remove()
-            if (rotDist(sp, p1) < r) n.add(sp)
+            if (p1 != sp && rotDist(sp, p1,scaleFactor) < r) n.add(sp)
         }
         return n
     }
@@ -365,11 +369,13 @@ fun main() {
         root = l1
     )
     val arms = ArmSystem(listOf(l1, l2))
+    arms.teleport(5*PI/4, 0.0)
+    arms.draw()
     arms.draw()
     Component4().prmArm(
         Pair(0.0, 0.0),
-        Pair(5 * PI / 4, PI),
-        Component1.generate_enviroment(20),
+        Pair(5 * PI / 4, 0.0),
+        Environment(obstacles = mutableListOf(SquareObstacle(Pair(Matrix(25.0,0.0),0.0),10.0,5.0))),
         arms
     )
 }
