@@ -10,7 +10,7 @@ class Bot(
     var frame: Pair<Matrix, Double>,
     points: List<Pair<Double, Double>>,
     endEffector: Pair<Matrix, Double>? = null,
-    private val botColor: Color,
+    var botColor: Color,
     val root: Bot? = null,
     var displayFrame: Boolean = true
 ) {

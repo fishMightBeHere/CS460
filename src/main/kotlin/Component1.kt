@@ -5,7 +5,7 @@ import java.io.FileWriter
 import kotlin.math.PI
 import kotlin.random.Random
 
-class Environment(
+data class Environment(
     val obstacles: MutableList<SquareObstacle> = mutableListOf(),
     val bots: MutableList<Bot> = mutableListOf()
 )

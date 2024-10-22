@@ -10,7 +10,7 @@ import kotlin.math.ln
 import kotlin.random.Random
 
 class Component6 {
-    fun prmStar(start: Pair<Matrix, Double>, goal: Pair<Matrix, Double>, env: Environment, bot: Bot) {
+    fun prmStar(start: Pair<Matrix, Double>, goal: Pair<Matrix, Double>, env: Environment, bot: Bot,sampleNo:Int = 1000) {
         val samples = mutableListOf<SampleFB>()
         val ghost = bot // should be bot.clone() deep copy of bot
 
@@ -18,7 +18,7 @@ class Component6 {
         val goalSampleFB = SampleFB(-1, goal)
         val startSampleFB = SampleFB(-2, start, cost = 0.0)
 
-        for (i in 0..<500) {
+        for (i in 0..<sampleNo) {
             // add samples
             val smp = SampleFB(
                 i, Pair(
@@ -135,7 +135,7 @@ class Component6 {
     }
 
     //hoping that we won't need 3 segment arms because this will need to get rewritten
-    fun prmArm(start: Pair<Double, Double>, goal: Pair<Double, Double>, env: Environment, arms: ArmSystem) {
+    fun prmArm(start: Pair<Double, Double>, goal: Pair<Double, Double>, env: Environment, arms: ArmSystem, sampleNo:Int = 1000) {
         val samples = mutableListOf<SampleArm>()
         val ghost = arms
 
@@ -148,7 +148,7 @@ class Component6 {
         val goalSample = SampleArm(-1, Pair(adjustedGoal1, adjustedGoal2))
         val startSample = SampleArm(-2, start, cost = 0.0)
 
-        for (i in 0..<500) {
+        for (i in 0..<sampleNo) {
             val smp = SampleArm(i, Pair(Random.nextDouble(-2 * PI, 2 * PI), Random.nextDouble(-2 * PI, 2 * PI)))
 
             samples.add(smp)

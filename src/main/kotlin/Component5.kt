@@ -6,7 +6,7 @@ import kotlin.math.PI
 import kotlin.random.Random
 
 class Component5 {
-    fun rrtFB(start: Pair<Matrix, Double>, goal: Pair<Matrix, Double>, env: Environment, bot: Bot) {
+    fun rrtFB(start: Pair<Matrix, Double>, goal: Pair<Matrix, Double>, env: Environment, bot: Bot,sampleNo:Int  = 1000) {
         bot.teleport(start)
         bot.draw()
         Component1.visualize_scene(env)
@@ -14,7 +14,7 @@ class Component5 {
         val goalSampleFB = SampleFB(-1, goal)
         val startSampleFB = SampleFB(-2, start, cost = 0.0)
         samples.add(startSampleFB)
-        for (i in 0..<1000) {
+        for (i in 0..<sampleNo) {
             val smp = SampleFB(
                 i,
                 Pair(
@@ -119,7 +119,7 @@ class Component5 {
         println("complete")
     }
 
-    fun rrtArm(start: Pair<Double, Double>, goal: Pair<Double, Double>, env: Environment, arms: ArmSystem) {
+    fun rrtArm(start: Pair<Double, Double>, goal: Pair<Double, Double>, env: Environment, arms: ArmSystem, sampleNo:Int = 1000) {
         arms.teleport(*start.toList().toDoubleArray())
         arms.draw()
 
@@ -133,7 +133,7 @@ class Component5 {
         val startSample = SampleArm(-2, start, cost = 0.0)
 
         samples.add(startSample)
-        for (i in 0..<1000) {
+        for (i in 0..<sampleNo) {
             val smp = SampleArm(i, Pair(Random.nextDouble(-2 * PI, 2 * PI), Random.nextDouble(-2 * PI, 2 * PI)))
             val nn = Component4().nearestNeighborsArm(smp, samples, 40.0, 1,5.0)
             if (nn.size > 0 && Component4().collisionFreeArm(arms, smp, nn[0], env)) {

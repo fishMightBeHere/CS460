@@ -70,7 +70,7 @@ class Component4 {
     fun rotDist(p1: SampleArm, p2: SampleArm, scaleFactor: Double = 2.0): Double =
         scaleFactor * abs(p1.pose.first - p2.pose.first) + abs(p1.pose.second - p2.pose.second)
 
-    fun prmFB(start: Pair<Matrix, Double>, goal: Pair<Matrix, Double>, env: Environment, bot: Bot) {
+    fun prmFB(start: Pair<Matrix, Double>, goal: Pair<Matrix, Double>, env: Environment, bot: Bot, sampleNo: Int = 1000) {
         val samples = mutableListOf<SampleFB>()
         val ghost = bot // should be bot.clone() deep copy of bot
 
@@ -78,7 +78,7 @@ class Component4 {
         val goalSampleFB = SampleFB(-1, goal)
         val startSampleFB = SampleFB(-2, start, cost = 0.0)
 
-        for (i in 0..<500) {
+        for (i in 0..<sampleNo) {
             // add samples
             val smp = SampleFB(
                 i, Pair(
@@ -188,7 +188,7 @@ class Component4 {
     }
 
     //hoping that we won't need 3 segment arms because this will need to get rewritten
-    fun prmArm(start: Pair<Double, Double>, goal: Pair<Double, Double>, env: Environment, arms: ArmSystem) {
+    fun prmArm(start: Pair<Double, Double>, goal: Pair<Double, Double>, env: Environment, arms: ArmSystem, sampleNo:Int = 1000) {
         val samples = mutableListOf<SampleArm>()
         val ghost = arms
 
@@ -199,7 +199,7 @@ class Component4 {
         val goalSample = SampleArm(-1, Pair(adjustedGoal1,adjustedGoal2))
         val startSample = SampleArm(-2, start, cost = 0.0)
 
-        for (i in 0..<500) {
+        for (i in 0..<sampleNo) {
             val smp = SampleArm(i, Pair(Random.nextDouble(-2 * PI, 2 * PI), Random.nextDouble(-2 * PI, 2 * PI)))
             samples.add(smp)
 
