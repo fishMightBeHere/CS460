@@ -1,3 +1,8 @@
+package Assignment2
+
+import Bot
+import Drawer
+import Matrix
 import java.awt.Color
 import java.awt.Color.BLUE
 import kotlin.time.measureTime

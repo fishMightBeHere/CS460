@@ -1,6 +1,13 @@
+package Assignment2
+
+import ArmSystem
+import Assignment1.A1C3
+import Assignment1.A1C4
+import Bot
+import Drawer
+import Matrix
 import edu.princeton.cs.introcs.StdDraw
 import java.awt.Color
-import java.lang.Math.log
 import java.util.*
 import kotlin.collections.HashSet
 import kotlin.math.E
@@ -10,7 +17,7 @@ import kotlin.math.ln
 import kotlin.random.Random
 
 class Component6 {
-    fun prmStar(start: Pair<Matrix, Double>, goal: Pair<Matrix, Double>, env: Environment, bot: Bot,sampleNo:Int = 1000) {
+    fun prmStar(start: Pair<Matrix, Double>, goal: Pair<Matrix, Double>, env: Environment, bot: Bot, sampleNo:Int = 1000) {
         val samples = mutableListOf<SampleFB>()
         val ghost = bot // should be bot.clone() deep copy of bot
 

@@ -1,3 +1,12 @@
+package Assignment2
+
+import ArmSystem
+import Assignment1.A1C3
+import Assignment1.A1C4
+import Bot
+import Drawer
+import Matrix
+import SquareObstacle
 import edu.princeton.cs.introcs.StdDraw
 import java.awt.Color
 import java.util.LinkedList
@@ -346,16 +355,16 @@ class Component4 {
 fun main() {
     Drawer(750, 750, 200, 200, 1.1)
 
-    Component4().prmFB(
+    /*Component4().prmFB(
         Pair(Matrix(-100.0, -100.0), 0.0), Pair(Matrix(100.0, 100.0), 0.0), Component1.generate_enviroment(27), Bot(
             Pair(Matrix(0.0, 0.0), 0.0),
             mutableListOf(Pair(1.5, -2.5), Pair(-1.5, -2.5), Pair(-1.5, 2.5), Pair(1.5, 2.5)),
             botColor = Color.MAGENTA,
             displayFrame = false
         )
-    )
+    )*/
 
-    /*val l1 = Bot(
+    val l1 = Bot(
         frame = Pair(Matrix(0.0, 0.0), 0.0),
         points = listOf(Pair(5.0, -10.0), Pair(5.0, 10.0), Pair(-5.0, 10.0), Pair(-5.0, -10.0)),
         endEffector = Pair(Matrix(0.0, 10.0), 0.0),
@@ -377,5 +386,5 @@ fun main() {
         Pair(5 * PI / 4, 0.0),
         Environment(obstacles = mutableListOf(SquareObstacle(Pair(Matrix(25.0,0.0),0.0),10.0,5.0))),
         arms
-    )*/
+    )
 }

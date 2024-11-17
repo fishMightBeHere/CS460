@@ -1,3 +1,9 @@
+package Assignment2
+
+import ArmSystem
+import Bot
+import Drawer
+import Matrix
 import edu.princeton.cs.introcs.StdDraw
 import java.awt.Color
 import kotlin.math.PI
@@ -67,6 +73,6 @@ class Component3 {
 fun main() {
     Drawer(750, 750, 200, 200, 0.9)
     val v = Component1.generate_enviroment(10).also { Component1.visualize_scene(it) }
-    //Component3.collisionCheckingFB(v)
-    Component3.collisionCheckingArm(v)
+    Component3.collisionCheckingFB(v)
+    //Component3.collisionCheckingArm(v)
 }

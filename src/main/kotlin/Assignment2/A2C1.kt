@@ -1,6 +1,10 @@
-import edu.princeton.cs.introcs.Draw
+package Assignment2
+
+import Bot
+import Drawer
+import Matrix
+import SquareObstacle
 import java.io.File
-import java.io.FileReader
 import java.io.FileWriter
 import kotlin.math.PI
 import kotlin.random.Random
@@ -56,7 +60,7 @@ class Component1 {
 }
 
 fun main() {
-    val b = Drawer(750, 750, drawScale = 0.3)
-    val a = Component1.generate_enviroment(5);
+    Drawer(750, 750, 200, 200, drawScale = 1.0)
+    val a = Component1.generate_enviroment(27);
     Component1.visualize_scene(a);
 }

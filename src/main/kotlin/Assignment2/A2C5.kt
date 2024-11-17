@@ -1,3 +1,12 @@
+package Assignment2
+
+import ArmSystem
+import Assignment1.A1C3
+import Assignment1.A1C4
+import Bot
+import Drawer
+import Matrix
+import SquareObstacle
 import edu.princeton.cs.introcs.StdDraw
 import java.awt.Color
 import java.util.*
@@ -6,7 +15,7 @@ import kotlin.math.PI
 import kotlin.random.Random
 
 class Component5 {
-    fun rrtFB(start: Pair<Matrix, Double>, goal: Pair<Matrix, Double>, env: Environment, bot: Bot,sampleNo:Int  = 1000) {
+    fun rrtFB(start: Pair<Matrix, Double>, goal: Pair<Matrix, Double>, env: Environment, bot: Bot, sampleNo:Int  = 1000) {
         bot.teleport(start)
         bot.draw()
         Component1.visualize_scene(env)
@@ -206,16 +215,16 @@ class Component5 {
 fun main() {
     Drawer(750, 750, 200, 200, 1.1)
 
-    Component5().rrtFB(
+    /*Component5().rrtFB(
         Pair(Matrix(-100.0, -100.0), 0.0), Pair(Matrix(100.0, 100.0), 0.0), Component1.generate_enviroment(27), Bot(
             Pair(Matrix(0.0, 0.0), 0.0),
             mutableListOf(Pair(1.5, -2.5), Pair(-1.5, -2.5), Pair(-1.5, 2.5), Pair(1.5, 2.5)),
             botColor = Color.MAGENTA,
             displayFrame = false
         )
-    )
+    )*/
 
-    /*val l1 = Bot(
+    val l1 = Bot(
         frame = Pair(Matrix(0.0, 0.0), 0.0),
         points = listOf(Pair(5.0, -10.0), Pair(5.0, 10.0), Pair(-5.0, 10.0), Pair(-5.0, -10.0)),
         endEffector = Pair(Matrix(0.0, 10.0), 0.0),
@@ -237,7 +246,7 @@ fun main() {
         Pair(-3 * PI / 4, 0.0),
         Environment(obstacles = mutableListOf(SquareObstacle(Pair(Matrix(27.0,0.0),0.0),10.0,5.0))),
         arms
-    )*/
+    )
 }
 
 

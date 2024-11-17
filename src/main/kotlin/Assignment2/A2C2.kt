@@ -1,3 +1,6 @@
+package Assignment2
+
+import Matrix
 import java.io.File
 import kotlin.math.abs
 import kotlin.math.sqrt
@@ -13,7 +16,7 @@ class Component2 {
 
         //calculates sum of the differences in angles of each frame in the arm, a -> [theta1, theta2]
         fun distanceArm(a: Matrix, b: Matrix): Double {
-            return abs(a[0, 0] - b[0, 0]) + abs(a[1, 0] - b[1, 0])
+            return 2*abs(a[0, 0] - b[0, 0]) + abs(a[1, 0] - b[1, 0])
         }
 
         //returns a list of the frames of the nearest neighbors

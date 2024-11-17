@@ -1,3 +1,8 @@
+package Assignment1
+
+import Bot
+import Drawer
+import Matrix
 import edu.princeton.cs.introcs.StdDraw
 import java.awt.Color
 import java.util.stream.IntStream
