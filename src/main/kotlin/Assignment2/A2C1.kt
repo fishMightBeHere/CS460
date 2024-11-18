@@ -61,6 +61,9 @@ class Component1 {
 
 fun main() {
     Drawer(750, 750, 200, 200, drawScale = 1.0)
-    val a = Component1.generate_enviroment(27);
+    /*val a = Component1.generate_enviroment(5);
     Component1.visualize_scene(a);
+    Component1.scene_to_file("environment1.txt",a)*/
+    Component1.visualize_scene(Component1.scene_from_file("C:\\Users\\Marco Hu\\IdeaProjects\\CS460\\environment1.txt"))
+
 }
