@@ -72,10 +72,10 @@ if __name__ == '__main__':
         graph.add(factor)
 
     prior = gtsam.noiseModel.Isotropic.Sigma(1, 1)
-    kr0 = gtsam.symbol('r', 0)    
+    kr0 = gtsam.symbol('r', 0)
     krT = gtsam.symbol('r', T)    
     v.insert(krT, gtsam.Rot2(0))
-    graph.addPriorRot2(kr0, r0, prior)
+    graph.addPriorRot2(kr0, r0, prior) #add start and goal states
     graph.addPriorRot2(krT, rT, prior)
 
     # Construct the optimizer and call with default parameters
@@ -97,7 +97,7 @@ if __name__ == '__main__':
         kv0 = gtsam.symbol('v', t) 
         r0 = result.atRot2(kr0)
         v0 = result.atDouble(kv0)
-        # print(t, r0, v0)
+        #print(t, r0, v0)
         pt = r0.rotate(p0)
         x.append(pt[0])
         y.append(pt[1])
