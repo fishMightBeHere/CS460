@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 dt = 0.1
 def f(q,v):
-    return np.array([q[0] + (v[0]*dt), q[1] + (v[1]*dt)])
+    return np.array([q[0] * gtsam.Rot2(v[0]*dt), q[1] * gtsam.Rot2(v[1]*dt)])
 
 def error_func(this:gtsam.CustomFactor, v: gtsam.Values, H:List[np.ndarray]):
     key_Theta1 = this.keys()[0]
@@ -16,14 +16,14 @@ def error_func(this:gtsam.CustomFactor, v: gtsam.Values, H:List[np.ndarray]):
     key_Theta2Future = this.keys()[5]
 
 
-    t1 = v.atDouble(key_Theta1)
+    t1 = v.atRot2(key_Theta1)
 
     v1 = v.atDouble(key_Velocity1)
-    t2 = v.atDouble(key_Theta2)
+    t2 = v.atRot2(key_Theta2)
 
     v2 = v.atDouble(key_Velocity2)
-    t1f = v.atDouble(key_Theta1Future)
-    t2f = v.atDouble(key_Theta2Future)
+    t1f = v.atRot2(key_Theta1Future)
+    t2f = v.atRot2(key_Theta2Future)
 
     prediction = f(np.array([t1, t2]), np.array([v1, v2]))
     if H is not None:
@@ -34,12 +34,12 @@ def error_func(this:gtsam.CustomFactor, v: gtsam.Values, H:List[np.ndarray]):
         H[4] = np.array([-1,0])
         H[5] = np.array([0,-1])
 
-    return np.array([t1f - prediction[0],  t2f - prediction[1]  ])
+    return np.array([t1f.theta() - prediction[0].theta(),  t2f.theta() - prediction[1].theta()  ])
     #return error
 if __name__ == "__main__":
 
-    start = np.array([2.5,0])
-    goal= np.array([-2.5,0])
+    start = np.array([gtsam.Rot2(2.5),gtsam.Rot2(0)])
+    goal= np.array([gtsam.Rot2(5),gtsam.Rot2(1)])
 
     graph = gtsam.NonlinearFactorGraph()
     v = gtsam.Values()
@@ -57,9 +57,9 @@ if __name__ == "__main__":
         keys = gtsam.KeyVector([kTheta1,kVelocity1,kTheta2,kVelocity2,kTheta1Future,kTheta2Future])
         factor = gtsam.CustomFactor(noise_model,keys,error_func)
 
-        v.insert(kTheta1,0.0)
+        v.insert(kTheta1,gtsam.Rot2(0.0))
         v.insert(kVelocity1,0.1)
-        v.insert(kTheta2,0.0)
+        v.insert(kTheta2,gtsam.Rot2(0.0))
         v.insert(kVelocity2,0.1)
 
         graph.add(factor)
@@ -70,12 +70,12 @@ if __name__ == "__main__":
     keyStart2 = gtsam.symbol("u",0)
     keyGoal1 = gtsam.symbol("t",T)
     keyGoal2 = gtsam.symbol("u",T)
-    v.insert(keyGoal1,0.0)
-    v.insert(keyGoal2,0.0)
-    graph.addPriorDouble(keyStart1,start[0],prior)
-    graph.addPriorDouble(keyStart2,start[1],prior)
-    graph.addPriorDouble(keyGoal1,goal[0],prior)
-    graph.addPriorDouble(keyGoal2,goal[1],prior)
+    v.insert(keyGoal1,gtsam.Rot2(0.0))
+    v.insert(keyGoal2,gtsam.Rot2(0.0))
+    graph.addPriorRot2(keyStart1,start[0],prior)
+    graph.addPriorRot2(keyStart2,start[1],prior)
+    graph.addPriorRot2(keyGoal1,goal[0],prior)
+    graph.addPriorRot2(keyGoal2,goal[1],prior)
 
     params = gtsam.LevenbergMarquardtParams()
     params.setVerbosityLM("SUMMARY")
@@ -88,9 +88,9 @@ if __name__ == "__main__":
     for t in range(T+1):
         keyTheta1 = gtsam.symbol("t",t)
         keyTheta2 = gtsam.symbol("u",t)
-        x.append(result.atDouble(keyTheta1))
-        y.append(result.atDouble(keyTheta2))
-        print(result.atDouble(keyTheta1), result.atDouble(keyTheta2))
+        x.append(result.atRot2(keyTheta1).theta())
+        y.append(result.atRot2(keyTheta2).theta())
+        print(result.atRot2(keyTheta1), result.atRot2(keyTheta2))
 
     fix, ax = plt.subplots()
     plt.scatter(x,y)
