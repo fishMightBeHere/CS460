@@ -1,3 +1,5 @@
+import argparse
+
 import numpy as np
 import gtsam
 from typing import List, Optional
@@ -35,15 +37,20 @@ def error_func(this:gtsam.CustomFactor, v: gtsam.Values, H:List[np.ndarray]):
         H[5] = np.array([0,-1])
 
     return np.array([t1f.theta() - prediction[0].theta(),  t2f.theta() - prediction[1].theta()  ])
-    #return error
-if __name__ == "__main__":
 
-    start = np.array([gtsam.Rot2(2.5),gtsam.Rot2(0)])
-    goal= np.array([gtsam.Rot2(5),gtsam.Rot2(1)])
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Two Link Robot Arm')
+    parser.add_argument("--start",nargs=2,type=float)
+    parser.add_argument("--goal",nargs=2,type=float)
+    parser.add_argument("--T",type=int)
+    parser.parse_args(namespace=parser)
+
+    start = np.array([gtsam.Rot2(parser.start[0]),gtsam.Rot2(parser.start[1])])
+    goal= np.array([gtsam.Rot2(parser.goal[0]),gtsam.Rot2(parser.goal[1])])
 
     graph = gtsam.NonlinearFactorGraph()
     v = gtsam.Values()
-    T = 50
+    T = parser.T
 
     noise_model = gtsam.noiseModel.Isotropic.Sigma(2,1)
     for t in range(T):
@@ -78,10 +85,10 @@ if __name__ == "__main__":
     graph.addPriorRot2(keyGoal2,goal[1],prior)
 
     params = gtsam.LevenbergMarquardtParams()
-    params.setVerbosityLM("SUMMARY")
+    #params.setVerbosityLM("SUMMARY")
     params.setMaxIterations(100)
     result = gtsam.LevenbergMarquardtOptimizer(graph, v,params).optimize()
-    result.print()
+    #result.print()
 
     x = []
     y = []
@@ -90,9 +97,9 @@ if __name__ == "__main__":
         keyTheta2 = gtsam.symbol("u",t)
         x.append(result.atRot2(keyTheta1).theta())
         y.append(result.atRot2(keyTheta2).theta())
-        print(result.atRot2(keyTheta1), result.atRot2(keyTheta2))
+        print(result.atRot2(keyTheta1).theta(), result.atRot2(keyTheta2).theta())
 
-    fix, ax = plt.subplots()
-    plt.scatter(x,y)
-    plt.plot(x,y)
-    plt.show()
+    # fix, ax = plt.subplots()
+    # plt.scatter(x,y)
+    # plt.plot(x,y)
+    # plt.show()

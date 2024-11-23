@@ -1,3 +1,5 @@
+import argparse
+
 import numpy as np
 import math
 import gtsam
@@ -26,8 +28,15 @@ def error_func(this: gtsam.CustomFactor, v: gtsam.Values, H: List[np.ndarray]):
 
 
 if __name__ == '__main__':
-    start = gtsam.Pose2(0, 0, 0)
-    goal = gtsam.Pose2(5, 7, np.pi / 2)
+    parser = argparse.ArgumentParser(description='Trajectory Optimization')
+    parser.add_argument("--start",nargs=3,type=float)
+    parser.add_argument("--goal",nargs=3,type=float)
+    parser.add_argument("--T",type=int)
+    parser.parse_args(namespace=parser)
+
+
+    start = gtsam.Pose2(parser.start[0], parser.start[1], parser.start[2])
+    goal = gtsam.Pose2(parser.goal[0], parser.goal[1], parser.goal[2])
 
     graph = gtsam.NonlinearFactorGraph()
     v = gtsam.Values()
@@ -57,8 +66,11 @@ if __name__ == '__main__':
     graph.addPriorPose2(key_start, start, prior)
 
     params = gtsam.LevenbergMarquardtParams()
-    params.setVerbosityLM("SUMMARY")
+    #params.setVerbosityLM("SUMMARY")
     params.setMaxIterations(100)
     result = gtsam.LevenbergMarquardtOptimizer(graph, v, params).optimize()
 
-    result.print()
+    for t in range(T):
+        key = gtsam.symbol('q',t)
+        val = result.atPose2(key)
+        print(val.x(), val.y(), val.theta())
